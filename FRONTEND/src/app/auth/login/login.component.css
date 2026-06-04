@@ -1,0 +1,32 @@
+.input-error {
+  border: 1px solid #dc3545; /* rojo */
+  background-color: #f8d7da; /* rosa claro */
+}
+
+.error-message {
+  color: #dc3545;
+  font-weight: 500;
+  margin-top: 10px;
+  background-color: #f8d7da;
+  border: 1px solid #dc3545;
+  padding: 8px;
+  border-radius: 4px;
+}
+
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  width: 100vw;
+  margin: 0;
+  background-image: url('../../../assets/images/loginBack.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
