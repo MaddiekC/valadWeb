@@ -10,13 +10,24 @@ class Controller extends BaseController
 {
     use AuthorizesRequests, ValidatesRequests;
 
-    /*function decryptPayload(string $payload, string $iv): array
+    protected function configurarConexionDinamica(?int $empresaId)
     {
-        $key = '123456789012345678901234567890123456789'; // Debe coincidir con Angular
-        $ivDecoded = base64_decode($iv);
-        $cipher = "AES-256-CBC";
+        $databaseName = 'VALAD';
 
-        $decrypted = openssl_decrypt(base64_decode($payload), $cipher, $key, OPENSSL_RAW_DATA, $ivDecoded);
-        return json_decode($decrypted, true);
-    }*/
+        if ($empresaId) {
+            $empresa = \App\Models\Empresa::where('idEmpresa', $empresaId)->first();
+            if ($empresa && $empresa->Base_sqlServer) {
+                $databaseName = trim($empresa->Base_sqlServer);
+            }
+        }
+
+        config([
+            'database.connections.dynamic' => array_merge(
+                config('database.connections.sqlsrv'),
+                ['database' => $databaseName]
+            )
+        ]);
+
+        \Illuminate\Support\Facades\DB::purge('dynamic');
+    }
 }

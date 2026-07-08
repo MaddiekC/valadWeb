@@ -4,6 +4,13 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 //import { EncryptionService } from './encryption.service';
+export interface ParametrosAts {
+  empresa_id: number | string;
+  mes: string;    // '06'
+  anio: string;   // '2026'
+  accion: 'vista_previa' | 'generar_xml';
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -22,10 +29,16 @@ export class ApiService {
   }
 
   //-----Cheques--------//
-  getPagosCheques(): Observable<any> {
-    return this.http.get(`${this.baseUrl}/pagosCheques`);
+  getPagosCheques(empresaId?: number): Observable<any> {
+    const url = empresaId ? `${this.baseUrl}/pagosCheques?empresa_id=${empresaId}` : `${this.baseUrl}/pagosCheques`;
+    return this.http.get(url);
   }
-  
+
+  //-----ATS--------//
+  getAts(ats: ParametrosAts): Observable<any> {
+    return this.http.post(`${this.baseUrl}/ats/procesar`, ats);
+  }
+
   //-----USUARIOS-------//
   getUsuarios(): Observable<any> {
     return this.http.get(`${this.baseUrl}/usuarios`);

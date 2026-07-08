@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { BosqueComponent } from './bosque.component';
+import { AtsComponent } from './ats.component';
 
-describe('BosqueComponent', () => {
-  let component: BosqueComponent;
-  let fixture: ComponentFixture<BosqueComponent>;
+describe('AtsComponent', () => {
+  let component: AtsComponent;
+  let fixture: ComponentFixture<AtsComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [BosqueComponent]
+      imports: [AtsComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(BosqueComponent);
+    fixture = TestBed.createComponent(AtsComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

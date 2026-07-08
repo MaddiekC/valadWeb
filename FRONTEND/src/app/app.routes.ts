@@ -26,6 +26,11 @@ export const routes: Routes = [
         data: { title: 'Ordp-Transacciones' }
       },
       {
+        path: 'ats',
+        loadComponent: () => import('./component/ats/ats.component').then(m => m.AtsComponent),
+        data: { title: 'ATS' }
+      },
+      {
         path: 'usuario',
         loadComponent: () => import('./component/usuario/usuario.component').then(m => m.UsuarioComponent),
         data: { title: 'Usuarios' }

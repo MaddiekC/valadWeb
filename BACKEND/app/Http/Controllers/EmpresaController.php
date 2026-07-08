@@ -18,6 +18,4 @@ class EmpresaController extends Controller
         $empresa = Empresa::where('idEmpresa', $id)->first();
         return response()->json($empresa);
     }
-
-  
 }

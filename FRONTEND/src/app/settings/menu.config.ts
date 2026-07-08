@@ -6,6 +6,12 @@ export const MENU_CONFIG = [
     route: '/',
   },
   {
+    title: 'ATS', 
+    img: '/assets/images/ats.png',
+    route: '//ats',
+    permission: 6,
+  },
+  {
     title: 'Orden de Pago',
     icon: '	bi bi-file-earmark-text ',
     submenus: [

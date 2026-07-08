@@ -24,9 +24,4 @@
   align-items: center;
   min-height: 100vh;
   width: 100vw;
-  margin: 0;
-  background-image: url('../../../assets/images/loginBack.jpg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
 }
