@@ -70,6 +70,6 @@ class User extends Authenticatable implements JWTSubject
 
     public function transacciones()
     {
-        return $this->belongsToMany(Transaccion::class);
+        return $this->belongsToMany(Transaccion::class)->wherePivot('estado', 'A')->withPivot('estado');
     }
 }

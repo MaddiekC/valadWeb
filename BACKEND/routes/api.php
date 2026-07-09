@@ -35,5 +35,8 @@ Route::group(
         Route::get('/usuarios', [UserController::class, 'index']); // Listar usuarios
         Route::post('/usuarios', [UserController::class, 'store']); // Crear usuario
         Route::put('/usuarios/{id}/inactive', [UserController::class, 'destroy']); // Inactivar usuario
+        Route::get('/transacciones', [UserController::class, 'getTransacciones']); // Listar todas las transacciones/permisos
+        Route::get('/usuarios/{id}/transacciones', [UserController::class, 'getUserTransacciones']); // Listar permisos de un usuario
+        Route::put('/usuarios/{id}/transacciones', [UserController::class, 'updateUserTransacciones']); // Actualizar permisos de un usuario
     }
 );

@@ -49,4 +49,13 @@ export class ApiService {
   putUsuarioInactive(id: number): Observable<any> {
     return this.http.put(`${this.baseUrl}/usuarios/${id}/inactive`, {});
   }
+  getTransacciones(): Observable<any> {
+    return this.http.get(`${this.baseUrl}/transacciones`);
+  }
+  getUserTransacciones(id: number): Observable<any> {
+    return this.http.get(`${this.baseUrl}/usuarios/${id}/transacciones`);
+  }
+  updateUserTransacciones(id: number, transaccionIds: number[]): Observable<any> {
+    return this.http.put(`${this.baseUrl}/usuarios/${id}/transacciones`, { transacciones: transaccionIds });
+  }
 }
