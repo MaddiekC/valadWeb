@@ -90,6 +90,90 @@ export class AtsComponent {
   empresas: any[] = [];
   empresaSeleccionada: string = '';
   filtroBusqueda: string = '';
+  filtroTipoId: string = '';
+  filtroTipoComp: string = '';
+  filtroCodRetencion: string = '';
+  filtroCodSustento: string = '';
+
+  get uniqueCodSustento(): string[] {
+    return [...new Set(this.atsData.map(d => d.codSustento).filter(Boolean))].sort();
+  }
+
+  get uniqueTipoId(): string[] {
+    return [...new Set(this.atsData.map(d => d.TipoID).filter(Boolean))].sort();
+  }
+
+  get uniqueTipoComp(): string[] {
+    return [...new Set(this.atsData.map(d => d.tipoComprobante).filter(Boolean))].sort();
+  }
+
+  get uniqueCodRetencion(): string[] {
+    const codes = new Set<string>();
+    this.atsData.forEach(ats => {
+      if (ats.detallesRetencion) {
+        ats.detallesRetencion.forEach(det => {
+          if (det.codRetAir) {
+            codes.add(det.codRetAir);
+          }
+        });
+      }
+    });
+    return [...codes].sort();
+  }
+
+  get totalBaseImponible(): number {
+    return this.atsDataFiltrada.reduce((acc, curr) => acc + (Number(curr.baseImponible) || 0), 0);
+  }
+
+  get totalBaseImpGrav(): number {
+    return this.atsDataFiltrada.reduce((acc, curr) => acc + (Number(curr.baseimpgrav) || 0), 0);
+  }
+
+  get totalMontoIva(): number {
+    return this.atsDataFiltrada.reduce((acc, curr) => acc + (Number(curr.montoIva) || 0), 0);
+  }
+
+  get totalRetBienes(): number {
+    return this.atsDataFiltrada.reduce((acc, curr) => 
+      acc + (Number(curr.valorRetBien10) || 0) + (Number(curr.valorRetBienes) || 0)
+    , 0);
+  }
+
+  get totalRetServicios(): number {
+    return this.atsDataFiltrada.reduce((acc, curr) => 
+      acc + (Number(curr.valRetServ20) || 0) + (Number(curr.valRetServ50) || 0) + (Number(curr.valorRetServicios) || 0)
+    , 0);
+  }
+
+  get totalRetIva100(): number {
+    return this.atsDataFiltrada.reduce((acc, curr) => acc + (Number(curr.valRetServ100) || 0), 0);
+  }
+
+  get totalBaseImpAir(): number {
+    return this.atsDataFiltrada.reduce((acc, curr) => {
+      if (!curr.detallesRetencion) return acc;
+      const sumAir = curr.detallesRetencion.reduce((sum, det) => {
+        if (this.filtroCodRetencion && det.codRetAir !== this.filtroCodRetencion) {
+          return sum;
+        }
+        return sum + (Number(det.baseImpAir) || 0);
+      }, 0);
+      return acc + sumAir;
+    }, 0);
+  }
+
+  get totalValRetAir(): number {
+    return this.atsDataFiltrada.reduce((acc, curr) => {
+      if (!curr.detallesRetencion) return acc;
+      const sumAir = curr.detallesRetencion.reduce((sum, det) => {
+        if (this.filtroCodRetencion && det.codRetAir !== this.filtroCodRetencion) {
+          return sum;
+        }
+        return sum + (Number(det.valRetAir) || 0);
+      }, 0);
+      return acc + sumAir;
+    }, 0);
+  }
 
   atsData: ats[] = [];
   atsDataFiltrada: ats[] = [];
@@ -170,6 +254,13 @@ export class AtsComponent {
       next: (res) => {
         const lista = res && res.success ? res.data : (Array.isArray(res) ? res : []);
         this.atsData = lista;
+        
+        // Reset sub-filters
+        this.filtroTipoId = '';
+        this.filtroTipoComp = '';
+        this.filtroCodRetencion = '';
+        this.filtroCodSustento = '';
+        
         this.atsDataFiltrada = lista;
         console.log('ATS cargados:', this.atsData);
         this.cargando = false;
@@ -182,19 +273,42 @@ export class AtsComponent {
   }
 
   aplicarFiltros(): void {
-    if (!this.filtroBusqueda.trim()) {
-      this.atsDataFiltrada = this.atsData;
-      return;
+    let list = this.atsData;
+
+    if (this.filtroBusqueda.trim()) {
+      const filterText = this.filtroBusqueda.toLowerCase();
+      list = list.filter((ats) => {
+        return (
+          (ats.idProv && ats.idProv.toLowerCase().includes(filterText)) ||
+          (ats.secuencial && ats.secuencial.toLowerCase().includes(filterText)) ||
+          (ats.autorizacion && ats.autorizacion.toLowerCase().includes(filterText)) ||
+          (ats.establecimiento && ats.establecimiento.toLowerCase().includes(filterText)) ||
+          (ats.razonSocial && ats.razonSocial.toLowerCase().includes(filterText))
+        );
+      });
     }
-    const filterText = this.filtroBusqueda.toLowerCase();
-    this.atsDataFiltrada = this.atsData.filter((ats) => {
-      return (
-        (ats.idProv && ats.idProv.toLowerCase().includes(filterText)) ||
-        (ats.secuencial && ats.secuencial.toLowerCase().includes(filterText)) ||
-        (ats.autorizacion && ats.autorizacion.toLowerCase().includes(filterText)) ||
-        (ats.establecimiento && ats.establecimiento.toLowerCase().includes(filterText))
+
+    if (this.filtroTipoId) {
+      list = list.filter(ats => ats.TipoID === this.filtroTipoId);
+    }
+
+    if (this.filtroTipoComp) {
+      list = list.filter(ats => ats.tipoComprobante === this.filtroTipoComp);
+    }
+
+    if (this.filtroCodRetencion) {
+      list = list.filter(ats => 
+        ats.detallesRetencion && 
+        ats.detallesRetencion.some(det => det.codRetAir === this.filtroCodRetencion)
       );
-    });
+    }
+
+    if (this.filtroCodSustento) {
+      list = list.filter(ats => ats.codSustento === this.filtroCodSustento);
+    }
+
+    this.atsDataFiltrada = list;
+    this.paginaActual = 1;
   }
   onEmpresaChange(): void {
     this.cargarAts();

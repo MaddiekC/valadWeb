@@ -70,3 +70,107 @@
   top: -1px;
   padding: 0 4px;
 }
+
+.premium-table-card {
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid rgba(25, 135, 84, 0.15);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    overflow-x: auto;
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+/* Custom scrollbar for premium card */
+.premium-table-card::-webkit-scrollbar {
+    height: 8px;
+}
+.premium-table-card::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 12px;
+}
+.premium-table-card::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 12px;
+    border: 2px solid #f1f5f9;
+}
+.premium-table-card::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+.premium-table {
+    width: 100%;
+    margin-bottom: 0;
+    color: #334155;
+    border-collapse: collapse;
+}
+
+.premium-table thead {
+    background: linear-gradient(135deg, #198754, #146c43);
+    color: #ffffff;
+}
+
+.premium-table th {
+    font-weight: 600;
+    font-size: 0.72rem;
+    letter-spacing: 0.2px;
+    padding: 8px 4px;
+    text-transform: uppercase;
+    border: none;
+    vertical-align: middle;
+}
+
+.premium-table tbody tr {
+    border-bottom: 1px solid #f1f5f9;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.premium-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.premium-table tbody tr:hover {
+    background-color: rgba(25, 135, 84, 0.04) !important;
+}
+
+.premium-table td {
+    padding: 5px 3px;
+    font-size: 0.72rem;
+    vertical-align: middle;
+    color: #475569;
+}
+
+.premium-table tbody tr:nth-of-type(odd) {
+    background-color: rgba(248, 250, 252, 0.8);
+}
+
+/* Custom badges/icons inside the table */
+.text-id-badge {
+    background-color: #e2e8f0;
+    color: #334155;
+    font-weight: 600;
+    font-size: 0.75rem;
+    padding: 3px 6px;
+    border-radius: 4px;
+}
+
+.info-btn-premium {
+    background: transparent;
+    border: 1px solid rgba(25, 135, 84, 0.3);
+    color: #198754;
+    transition: all 0.2s ease;
+    border-radius: 6px;
+}
+
+.info-btn-premium:hover {
+    background: #198754;
+    color: #ffffff;
+    border-color: #198754;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(25, 135, 84, 0.2);
+}
+
+.fs-7 {
+    font-size: 0.8rem;
+}
+
