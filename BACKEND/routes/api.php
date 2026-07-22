@@ -30,6 +30,7 @@ Route::group(
         Route::get('/empresas/{id}', [EmpresaController::class, 'show']); 
         
         Route::post('/ats/procesar', [AtsController::class, 'procesarAts']);
+        Route::put('/ats/retencion/autorizacion', [AtsController::class, 'actualizarAutorizacionRetencion']);
         Route::get('/pagosCheques', [DetallePagoController::class, 'listarCheques']);
     
         Route::get('/usuarios', [UserController::class, 'index']); // Listar usuarios

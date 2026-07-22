@@ -58,4 +58,12 @@ export class ApiService {
   updateUserTransacciones(id: number, transaccionIds: number[]): Observable<any> {
     return this.http.put(`${this.baseUrl}/usuarios/${id}/transacciones`, { transacciones: transaccionIds });
   }
+
+  actualizarAutorizacionRetencion(params: {
+    empresa_id: string | number;
+    id_fila: string;
+    autretencion1: string;
+  }): Observable<any> {
+    return this.http.put(`${this.baseUrl}/ats/retencion/autorizacion`, params);
+  }
 }

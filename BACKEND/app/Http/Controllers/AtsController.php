@@ -329,4 +329,61 @@ class AtsController extends Controller
             ], 500);
         }
     }
+
+    public function actualizarAutorizacionRetencion(Request $request)
+    {
+        $request->validate([
+            'empresa_id'    => 'required|integer',
+            'id_fila'       => 'required|string',
+            'autretencion1' => 'required|string|size:49|regex:/^[0-9]{49}$/',
+        ]);
+
+        $empresaId = (int)$request->input('empresa_id');
+        $idFila = trim($request->input('id_fila'));
+        $autRetencion = trim($request->input('autretencion1'));
+
+        $this->configurarConexionDinamica($empresaId);
+
+        try {
+            $affected = DB::connection('dynamic')
+                ->table('SGI_Sri_Compras')
+                ->whereRaw("id_fila = CAST(? AS uniqueidentifier)", [$idFila])
+                ->update([
+                    'autretencion1' => $autRetencion
+                ]);
+
+            if ($affected === 0) {
+                // Si la fila existe pero el valor no cambió, Laravel update devuelve 0.
+                // Verificamos si realmente existe el registro para dar un mensaje adecuado.
+                $existe = DB::connection('dynamic')
+                    ->table('SGI_Sri_Compras')
+                    ->whereRaw("id_fila = CAST(? AS uniqueidentifier)", [$idFila])
+                    ->exists();
+
+                if (!$existe) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'No se encontró el registro de compra.'
+                    ], 404);
+                }
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'La autorización de retención ya tiene ese valor o no se realizaron cambios.'
+                ]);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Autorización de retención actualizada con éxito.'
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar la autorización: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }
+

@@ -68,6 +68,7 @@ interface ats {
   formaPago01: string;
   detallesRetencion?: RetencionDetalle[];
   detallesReembolso?: ReembolsoDetalle[];
+  id_fila?: string;
 }
 
 @Component({
@@ -86,6 +87,9 @@ export class AtsComponent {
   facturaSeleccionada: ats | null = null;
   cargando: boolean = false;
   username: string = '';
+  editandoAut: boolean = false;
+  tempAut: string = '';
+  cargandoEdicion: boolean = false;
 
   empresas: any[] = [];
   empresaSeleccionada: string = '';
@@ -94,6 +98,7 @@ export class AtsComponent {
   filtroTipoComp: string = '';
   filtroCodRetencion: string = '';
   filtroCodSustento: string = '';
+  filtroAutRetMalFormed: boolean = false;
 
   get uniqueCodSustento(): string[] {
     return [...new Set(this.atsData.map(d => d.codSustento).filter(Boolean))].sort();
@@ -246,6 +251,8 @@ export class AtsComponent {
     if (!this.empresaSeleccionada) {
       return;
     }
+    this.atsData = [];
+    this.atsDataFiltrada = [];
     const parametros = this.obtenerParametrosAts();
     console.log('Cargando ATS con parámetros:', parametros);
     this.cargando = true;
@@ -260,6 +267,7 @@ export class AtsComponent {
         this.filtroTipoComp = '';
         this.filtroCodRetencion = '';
         this.filtroCodSustento = '';
+        this.filtroAutRetMalFormed = false;
         
         this.atsDataFiltrada = lista;
         console.log('ATS cargados:', this.atsData);
@@ -268,6 +276,10 @@ export class AtsComponent {
       error: (err) => {
         console.error('Error al cargar ATS', err);
         this.cargando = false;
+        this.atsData = [];
+        this.atsDataFiltrada = [];
+        const errMsg = err.error?.message || err.message || 'Error de comunicación con el servidor';
+        Swal.fire('Error', `No se pudo cargar la información del ATS`);
       }
     });
   }
@@ -305,6 +317,10 @@ export class AtsComponent {
 
     if (this.filtroCodSustento) {
       list = list.filter(ats => ats.codSustento === this.filtroCodSustento);
+    }
+
+    if (this.filtroAutRetMalFormed) {
+      list = list.filter(ats => this.isAutRetMalformed(ats));
     }
 
     this.atsDataFiltrada = list;
@@ -384,6 +400,8 @@ export class AtsComponent {
 
   verDetallesFactura(atsItem: ats): void {
     this.facturaSeleccionada = atsItem;
+    this.editandoAut = false;
+    this.tempAut = '';
     if (this.detallesModalInstance) {
       this.detallesModalInstance.show();
     }
@@ -393,5 +411,125 @@ export class AtsComponent {
     if (this.detallesModalInstance) {
       this.detallesModalInstance.hide();
     }
+  }
+
+  activarEdicion(): void {
+    if (this.facturaSeleccionada && this.facturaSeleccionada.detallesRetencion && this.facturaSeleccionada.detallesRetencion.length > 0) {
+      this.tempAut = this.facturaSeleccionada.detallesRetencion[0].AutoriRet || '';
+      this.editandoAut = true;
+    }
+  }
+
+  cancelarEdicion(): void {
+    this.editandoAut = false;
+    this.tempAut = '';
+  }
+
+  guardarEdicion(): void {
+    if (!this.facturaSeleccionada || !this.facturaSeleccionada.id_fila) {
+      Swal.fire('Error', 'No se puede identificar el registro para actualizar', 'error');
+      return;
+    }
+
+    if (!this.tempAut.trim()) {
+      Swal.fire('Atención', 'El número de autorización no puede estar vacío', 'warning');
+      return;
+    }
+
+    const cleanAut = this.tempAut.trim();
+    if (!/^\d{49}$/.test(cleanAut)) {
+      Swal.fire('Atención', 'La autorización de retención debe tener exactamente 49 dígitos numéricos', 'warning');
+      return;
+    }
+
+    this.cargandoEdicion = true;
+
+    const params = {
+      empresa_id: this.empresaSeleccionada,
+      id_fila: this.facturaSeleccionada.id_fila,
+      autretencion1: this.tempAut.trim()
+    };
+
+    this.apiService.actualizarAutorizacionRetencion(params).subscribe({
+      next: (res) => {
+        this.cargandoEdicion = false;
+        if (res && res.success) {
+          Swal.fire('Éxito', 'Autorización de retención actualizada correctamente', 'success');
+          
+          // Actualizar localmente el objeto facturaSeleccionada
+          if (this.facturaSeleccionada && this.facturaSeleccionada.detallesRetencion && this.facturaSeleccionada.detallesRetencion.length > 0) {
+            this.facturaSeleccionada.detallesRetencion[0].AutoriRet = this.tempAut.trim();
+          }
+
+          // También debemos actualizarlo en el listado original atsData para que se refresque en la tabla principal
+          const originalItem = this.atsData.find(item => item.id_fila === this.facturaSeleccionada?.id_fila);
+          if (originalItem && originalItem.detallesRetencion && originalItem.detallesRetencion.length > 0) {
+            originalItem.detallesRetencion[0].AutoriRet = this.tempAut.trim();
+          }
+
+          // Re-aplicar filtros para actualizar la vista principal
+          this.aplicarFiltros();
+
+          this.editandoAut = false;
+        } else {
+          Swal.fire('Error', res.message || 'No se pudo actualizar la autorización', 'error');
+        }
+      },
+      error: (err) => {
+        this.cargandoEdicion = false;
+        console.error('Error al actualizar autorización', err);
+        const msg = err.error?.message || 'Error de comunicación con el servidor';
+        Swal.fire('Error', msg, 'error');
+      }
+    });
+  }
+
+  isAutRetMalformed(atsItem: ats): boolean {
+    if (!atsItem.detallesRetencion || atsItem.detallesRetencion.length === 0) {
+      return false;
+    }
+    const ret = atsItem.detallesRetencion[0];
+    const noReten = ret.NoReten ? ret.NoReten.trim() : '';
+    
+    // Si no hay secuencial de retención, no validamos
+    if (!noReten) {
+      return false;
+    }
+
+    const aut = ret.AutoriRet ? ret.AutoriRet.trim() : '';
+    const dateStr = ret.FchRete ? ret.FchRete.trim() : '';
+
+    // Si no tiene exactamente 49 dígitos numéricos, se considera mala
+    if (!/^\d{49}$/.test(aut)) {
+      return true;
+    }
+
+    // Si tiene número de retención pero no tiene fecha, está mal formada
+    if (!dateStr) {
+      return true;
+    }
+
+    // Convertir dateStr a formato DDMMYYYY
+    let expectedPrefix = '';
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
+      expectedPrefix = dateStr.replace(/\//g, '');
+    } else if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+      const parts = dateStr.split('-');
+      expectedPrefix = parts[2] + parts[1] + parts[0];
+    } else if (/^\d{2}-\d{2}-\d{4}$/.test(dateStr)) {
+      expectedPrefix = dateStr.replace(/-/g, '');
+    } else {
+      const digitsOnly = dateStr.replace(/\D/g, '');
+      if (digitsOnly.length === 8) {
+        expectedPrefix = digitsOnly;
+      }
+    }
+
+    if (!expectedPrefix || expectedPrefix.length !== 8) {
+      return true; // Formato de fecha no válido o irreconocible
+    }
+
+    // Si la autorización no comienza con la fecha esperada, está mal formada
+    return !aut.startsWith(expectedPrefix);
   }
 }

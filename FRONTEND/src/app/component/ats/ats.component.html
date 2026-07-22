@@ -42,12 +42,6 @@
             <i class="bi bi-file-earmark-arrow-down"></i> Generar XML
         </button>
     </div>
-
-    <div class="col-auto ms-auto d-flex align-items-center gap-2">
-        <label for="buscarFiltro" class="form-label mb-0 fw-bold"><i class="bi bi-search"></i> Buscar:</label>
-        <input id="buscarFiltro" type="text" class="form-control form-control-sm" style="width: 280px;"
-            placeholder="Secuencial, RUC, Razón Social..." [(ngModel)]="filtroBusqueda" (input)="aplicarFiltros()">
-    </div>
 </div>
 
 <!-- Filtros Secundarios -->
@@ -58,6 +52,17 @@
         </span>
     </div>
     
+    <!-- Buscador -->
+    <div class="flex-grow-1" style="min-width: 220px; max-width: 320px;">
+        <div class="input-group input-group-sm">
+            <span class="input-group-text bg-success-subtle border-success-subtle fw-semibold text-success-emphasis" style="font-size: 0.8rem;">
+                <i class="bi bi-search me-1"></i> Buscar:
+            </span>
+            <input id="buscarFiltro" type="text" class="form-control border-success-subtle" style="font-size: 0.85rem;"
+                placeholder="Secuencial, RUC, Razón Social..." [(ngModel)]="filtroBusqueda" (input)="aplicarFiltros()">
+        </div>
+    </div>
+
     <!-- Filtro Cod Sustento -->
     <div class="flex-grow-1" style="min-width: 130px; max-width: 175px;">
         <div class="input-group input-group-sm">
@@ -99,6 +104,17 @@
                 <option value="">Todos</option>
                 <option *ngFor="let val of uniqueCodRetencion" [value]="val">{{ val }}</option>
             </select>
+        </div>
+    </div>
+
+    <!-- Filtro Aut Ret Mal Formada -->
+    <div class="d-flex align-items-center ms-2" style="min-width: 160px; height: 31px;">
+        <div class="form-check form-switch mb-0">
+            <input class="form-check-input" type="checkbox" role="switch" id="switchAutRetMalFormed"
+                [(ngModel)]="filtroAutRetMalFormed" (change)="aplicarFiltros()" style="cursor: pointer;">
+            <label class="form-check-label fw-semibold text-danger-emphasis d-inline-flex align-items-center" for="switchAutRetMalFormed" style="font-size: 0.85rem; cursor: pointer;">
+                <i class="bi bi-exclamation-triangle-fill text-danger me-1"></i> Aut ret. Mal Formadas
+            </label>
         </div>
     </div>
 </div>
@@ -200,12 +216,19 @@
                             *ngFor="let ats of atsDataFiltrada | paginate: { itemsPerPage: itemsPorPagina, currentPage: paginaActual }">
 
                             <td class="text-center">
-                                <button
-                                    class="btn info-btn-premium btn-sm p-1 d-inline-flex align-items-center justify-content-center"
-                                    style="width: 26px; height: 26px;" (click)="verDetallesFactura(ats)"
-                                    title="Ver reembolsos, retenciones y bases">
-                                    <i class="bi bi-info-circle-fill"></i>
-                                </button>
+                                <div class="d-inline-flex align-items-center gap-1 justify-content-center">
+                                    <button
+                                        class="btn info-btn-premium btn-sm p-1 d-inline-flex align-items-center justify-content-center"
+                                        style="width: 26px; height: 26px;" (click)="verDetallesFactura(ats)"
+                                        title="Ver reembolsos, retenciones y bases">
+                                        <i class="bi bi-info-circle-fill"></i>
+                                    </button>
+                                    <i *ngIf="isAutRetMalformed(ats)"
+                                        class="bi bi-exclamation-circle-fill text-danger"
+                                        style="font-size: 0.8rem; cursor: default;"
+                                        title="Revisar Autorización de retención">
+                                    </i>
+                                </div>
                             </td>
                             <td class="text-center">
                                 {{ ats.codSustento }}
@@ -445,16 +468,49 @@
                                             <i class="bi bi-receipt-cutoff"></i> Comprobante de Retención Emitido
                                         </div>
                                         <div class="card-body py-2 bg-light" style="font-size: 0.8rem;">
-                                            <div class="row g-2">
+                                            <div class="row g-2 align-items-center">
                                                 <div class="col-md-4"><strong>Nro. Comprobante:</strong> {{
                                                     facturaSeleccionada.detallesRetencion[0].SerieRet }}-{{
                                                     facturaSeleccionada.detallesRetencion[0].PtoEmiRet }}-{{
                                                     facturaSeleccionada.detallesRetencion[0].NoReten }}</div>
                                                 <div class="col-md-4"><strong>Fecha Emisión:</strong> {{
                                                     facturaSeleccionada.detallesRetencion[0].FchRete }}</div>
-                                                <div class="col-md-4"><strong>Autorización:</strong> <span
-                                                        class="text-break font-monospace">{{
-                                                        facturaSeleccionada.detallesRetencion[0].AutoriRet }}</span>
+                                                
+                                                <!-- Vista de lectura de Autorización -->
+                                                <div class="col-md-4" *ngIf="!editandoAut">
+                                                    <div class="d-flex align-items-start gap-1">
+                                                        <div class="flex-grow-1">
+                                                            <strong>Autorización:</strong>
+                                                            <span class="text-break font-monospace d-block text-secondary" style="font-size: 0.75rem;">
+                                                                {{ facturaSeleccionada.detallesRetencion[0].AutoriRet }}
+                                                            </span>
+                                                        </div>
+                                                        <button *ngIf="isAutRetMalformed(facturaSeleccionada)" 
+                                                            class="btn btn-sm btn-outline-primary p-1 border-0" 
+                                                            (click)="activarEdicion()" title="Editar autorización">
+                                                            <i class="bi bi-pencil-square" style="font-size: 0.95rem;"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Vista de edición de Autorización -->
+                                                <div class="col-md-4" *ngIf="editandoAut">
+                                                    <strong>Autorización:</strong>
+                                                    <div class="input-group input-group-sm mt-1 shadow-sm">
+                                                        <input type="text" class="form-control font-monospace" 
+                                                            [(ngModel)]="tempAut" style="font-size: 0.72rem;" 
+                                                            placeholder="Ingrese número de autorización" [disabled]="cargandoEdicion"
+                                                            maxlength="49" pattern="[0-9]*" inputmode="numeric">
+                                                        <button class="btn btn-success btn-sm" type="button" (click)="guardarEdicion()" 
+                                                            [disabled]="cargandoEdicion" title="Guardar">
+                                                            <i *ngIf="!cargandoEdicion" class="bi bi-check-lg"></i>
+                                                            <span *ngIf="cargandoEdicion" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                                        </button>
+                                                        <button class="btn btn-danger btn-sm" type="button" (click)="cancelarEdicion()" 
+                                                            [disabled]="cargandoEdicion" title="Cancelar">
+                                                            <i class="bi bi-x-lg"></i>
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>

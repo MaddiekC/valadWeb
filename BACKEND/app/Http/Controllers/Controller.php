@@ -23,7 +23,7 @@ class Controller extends BaseController
 
         config([
             'database.connections.dynamic' => array_merge(
-                config('database.connections.sqlsrv'),
+                config('database.connections.sqlsrv_db4'),
                 ['database' => $databaseName]
             )
         ]);

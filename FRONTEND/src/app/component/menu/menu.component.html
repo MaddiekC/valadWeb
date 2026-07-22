@@ -1,18 +1,50 @@
-<div class="d-flex justify-content-center align-items-center ">
-        <div class="container">
-                <button *hasPermission="50" class="botones" [routerLink]="['/ordp-cheques']"><img
-                                src="/assets/images/cheque.png" width="100" height="100"></button>
-                <p *hasPermission="50" style="font-size: medium;">Cheques</p>
-                <button *hasPermission="51" class="botones" [routerLink]="['/ats']"><img
-                                src="/assets/images/ats.png" width="100" height="100"></button>
-                <p *hasPermission="51" style="font-size: medium;">ATS</p>
+<div class="menu-container py-4 animate__animated animate__fadeIn">
+  <div class="menu-header-section">
+    <h2 class="menu-title">Módulos del Sistema</h2>
+    <p class="menu-subtitle">Selecciona una opción para gestionar tus operaciones bancarias y fiscales</p>
+  </div>
+
+  <div class="row g-4 justify-content-center w-100 px-md-5">
+    <!-- Card Cheques -->
+    <div *hasPermission="50" class="col-12 col-sm-6 col-md-4 col-lg-3 d-flex">
+      <div class="menu-card text-center p-4 w-100" [routerLink]="['/ordp-cheques']">
+        <div class="menu-card-icon-wrapper mb-3">
+          <img src="/assets/images/cheque.png" alt="Cheques" class="menu-card-img">
         </div>
-        <div class="container">
-                <button *hasPermission="52" class="botones" [routerLink]="['/ordp-transacciones']"><img
-                                src="/assets/images/transaccion.png" width="100" height="100"></button>
-                <p *hasPermission="52" style="font-size: medium;">Transacciones</p>
-                <button *hasPermission="51" class="botones" [routerLink]="['/ats']"><img
-                                src="/assets/images/ats.png" width="100" height="100"></button>
-                <p *hasPermission="51" style="font-size: medium;">ATS</p>
+        <h4 class="menu-card-title">Cheques</h4>
+        <p class="menu-card-description">Gestión y control de órdenes de pago con cheques</p>
+        <div class="menu-card-action mt-auto">
+          <span class="btn btn-outline-primary w-100">Ingresar</span>
         </div>
+      </div>
+    </div>
+
+    <!-- Card ATS -->
+    <div *hasPermission="51" class="col-12 col-sm-6 col-md-4 col-lg-3 d-flex">
+      <div class="menu-card text-center p-4 w-100" [routerLink]="['/ats']">
+        <div class="menu-card-icon-wrapper mb-3">
+          <img src="/assets/images/ats.png" alt="ATS" class="menu-card-img">
+        </div>
+        <h4 class="menu-card-title">ATS</h4>
+        <p class="menu-card-description">Anexo Transaccional Simplificado y consultas tributarias</p>
+        <div class="menu-card-action mt-auto">
+          <span class="btn btn-outline-primary w-100">Ingresar</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card Transacciones -->
+    <div *hasPermission="52" class="col-12 col-sm-6 col-md-4 col-lg-3 d-flex">
+      <div class="menu-card text-center p-4 w-100" [routerLink]="['/ordp-transacciones']">
+        <div class="menu-card-icon-wrapper mb-3">
+          <img src="/assets/images/transaccion.png" alt="Transacciones" class="menu-card-img">
+        </div>
+        <h4 class="menu-card-title">Transacciones</h4>
+        <p class="menu-card-description">Registro y visualización de órdenes de pago transaccionales</p>
+        <div class="menu-card-action mt-auto">
+          <span class="btn btn-outline-primary w-100">Ingresar</span>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
