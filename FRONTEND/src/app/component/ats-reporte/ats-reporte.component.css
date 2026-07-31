@@ -1,0 +1,117 @@
+.reporte-print-container {
+  font-family: Arial, sans-serif;
+  background-color: #fff;
+  padding: 20px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.reporte-header {
+  margin-bottom: 20px;
+  border-bottom: 2px solid #0b3c5d;
+  padding-bottom: 10px;
+}
+
+.reporte-title {
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: #333;
+  text-transform: uppercase;
+}
+
+.reporte-subtitle {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.reporte-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+.reporte-table th {
+  background-color: #0b3c5d !important;
+  color: #fff !important;
+  font-weight: bold;
+  text-align: center;
+  padding: 8px;
+  font-size: 0.85rem;
+  border: 1px solid #dee2e6;
+  text-transform: uppercase;
+  white-space: normal !important;
+}
+
+.reporte-table td {
+  padding: 6px 10px;
+  font-size: 0.85rem;
+  border-bottom: 1px solid #dee2e6;
+  white-space: normal !important;
+  word-wrap: break-word;
+}
+
+.grupo-titulo-row {
+  background-color: #ffe0b2 !important; /* Yellow-orange color as requested */
+  color: #5d4037 !important;
+  font-weight: bold;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+}
+
+.subtitulo-row {
+  font-weight: bold;
+  color: #333 !important;
+  background-color: #f9f9f9 !important;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.font-monospace {
+  font-family: var(--bs-font-monospace), monospace;
+}
+
+.total-general-row {
+  font-weight: bold;
+  background-color: #e0f2f1 !important;
+  border-top: 2px solid #004d40;
+  border-bottom: 2px solid #004d40;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .reporte-print-container, .reporte-print-container * {
+    visibility: visible;
+  }
+  .reporte-print-container {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  
+  /* Ensure backgrounds render during printing */
+  .grupo-titulo-row {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    background-color: #ffe0b2 !important;
+  }
+  .total-general-row {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    background-color: #e0f2f1 !important;
+  }
+}

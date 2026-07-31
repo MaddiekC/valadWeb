@@ -5,6 +5,7 @@ import { NgxPaginationModule } from 'ngx-pagination';
 import { FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
 import { ParametrosAts, ApiService } from '../../services/api.service';
+import { AtsReporteComponent } from '../ats-reporte/ats-reporte.component';
 
 declare const bootstrap: any;
 
@@ -74,7 +75,7 @@ interface ats {
 @Component({
   selector: 'app-ats',
   standalone: true,
-  imports: [CommonModule, RouterModule, NgxPaginationModule, FormsModule],
+  imports: [CommonModule, RouterModule, NgxPaginationModule, FormsModule, AtsReporteComponent],
   templateUrl: './ats.component.html',
   styleUrl: './ats.component.css'
 })
@@ -86,6 +87,7 @@ export class AtsComponent {
 
   facturaSeleccionada: ats | null = null;
   cargando: boolean = false;
+  vistaActiva: 'listado' | 'reporte' = 'listado';
   username: string = '';
   editandoAut: boolean = false;
   tempAut: string = '';
@@ -97,6 +99,7 @@ export class AtsComponent {
   filtroTipoId: string = '';
   filtroTipoComp: string = '';
   filtroCodRetencion: string = '';
+  filtroBienesServ: string = '';
   filtroCodSustento: string = '';
   filtroAutRetMalFormed: boolean = false;
 
@@ -125,6 +128,8 @@ export class AtsComponent {
     });
     return [...codes].sort();
   }
+
+
 
   get totalBaseImponible(): number {
     return this.atsDataFiltrada.reduce((acc, curr) => acc + (Number(curr.baseImponible) || 0), 0);
@@ -267,6 +272,7 @@ export class AtsComponent {
         this.filtroTipoComp = '';
         this.filtroCodRetencion = '';
         this.filtroCodSustento = '';
+        this.filtroBienesServ = '';
         this.filtroAutRetMalFormed = false;
         
         this.atsDataFiltrada = lista;
@@ -313,6 +319,16 @@ export class AtsComponent {
         ats.detallesRetencion && 
         ats.detallesRetencion.some(det => det.codRetAir === this.filtroCodRetencion)
       );
+    }
+
+    if (this.filtroBienesServ) {
+      if (this.filtroBienesServ === 'bienes') {
+        list = list.filter(ats => (Number(ats.valorRetBien10) || 0) > 0 || (Number(ats.valorRetBienes) || 0) > 0);
+      } else if (this.filtroBienesServ === 'servicios_exc_iva') {
+        list = list.filter(ats => (Number(ats.valRetServ100) || 0) > 0);
+      } else if (this.filtroBienesServ === 'servicios_con_iva') {
+        list = list.filter(ats => (Number(ats.valRetServ20) || 0) > 0 || (Number(ats.valRetServ50) || 0) > 0 || (Number(ats.valorRetServicios) || 0) > 0);
+      }
     }
 
     if (this.filtroCodSustento) {
@@ -531,5 +547,32 @@ export class AtsComponent {
 
     // Si la autorización no comienza con la fecha esperada, está mal formada
     return !aut.startsWith(expectedPrefix);
+  }
+
+  getNombreEmpresaSeleccionada(): string {
+    const emp = this.empresas.find(e => e.idEmpresa == this.empresaSeleccionada);
+    return emp ? emp.nombre : '';
+  }
+
+  getPorcentajeIVA(atsItem: ats, tipo: 'bien' | 'servicio'): string {
+    if (tipo === 'bien') {
+      if ((Number(atsItem.valorRetBien10) || 0) > 0) return '10%';
+      if ((Number(atsItem.valorRetBienes) || 0) > 0) return '30%';
+      return '0%';
+    } else {
+      if ((Number(atsItem.valRetServ20) || 0) > 0) return '20%';
+      if ((Number(atsItem.valRetServ50) || 0) > 0) return '50%';
+      if ((Number(atsItem.valorRetServicios) || 0) > 0) return '70%';
+      if ((Number(atsItem.valRetServ100) || 0) > 0) return '100%';
+      return '0%';
+    }
+  }
+
+  getValorIVA(atsItem: ats, tipo: 'bien' | 'servicio'): number {
+    if (tipo === 'bien') {
+      return (Number(atsItem.valorRetBien10) || 0) + (Number(atsItem.valorRetBienes) || 0);
+    } else {
+      return (Number(atsItem.valRetServ20) || 0) + (Number(atsItem.valRetServ50) || 0) + (Number(atsItem.valorRetServicios) || 0) + (Number(atsItem.valRetServ100) || 0);
+    }
   }
 }

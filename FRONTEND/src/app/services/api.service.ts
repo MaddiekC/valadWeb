@@ -39,6 +39,10 @@ export class ApiService {
     return this.http.post(`${this.baseUrl}/ats/procesar`, ats);
   }
 
+  getCatalogoRetenciones(): Observable<any> {
+    return this.http.get(`${this.baseUrl}/ats/catalogo-retenciones`);
+  }
+
   //-----USUARIOS-------//
   getUsuarios(): Observable<any> {
     return this.http.get(`${this.baseUrl}/usuarios`);

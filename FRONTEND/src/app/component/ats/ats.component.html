@@ -42,20 +42,38 @@
             <i class="bi bi-file-earmark-arrow-down"></i> Generar XML
         </button>
     </div>
+
+    <!-- Selector de Vista (Tabs) -->
+    <div class="col-auto ms-auto no-print">
+        <div class="btn-group btn-group-sm" role="group" aria-label="Selector de vista">
+            <button type="button" class="btn btn-outline-success d-inline-flex align-items-center gap-1"
+                [class.active]="vistaActiva === 'listado'" (click)="vistaActiva = 'listado'">
+                <i class="bi bi-table"></i> Vista Transaccional
+            </button>
+            <button type="button" class="btn btn-outline-success d-inline-flex align-items-center gap-1"
+                [class.active]="vistaActiva === 'reporte'" (click)="vistaActiva = 'reporte'">
+                <i class="bi bi-file-earmark-bar-graph"></i> Resumen de Retenciones
+            </button>
+        </div>
+    </div>
 </div>
 
+<!-- Filtros y Cards (Sólo Vista Transaccional) -->
+<ng-container *ngIf="vistaActiva === 'listado'">
 <!-- Filtros Secundarios -->
-<div class="d-flex flex-nowrap gap-2 align-items-center p-2 mb-3 bg-white border border-success-subtle rounded-3 shadow-sm mx-0 overflow-x-auto">
+<div
+    class="d-flex flex-nowrap gap-2 align-items-center p-2 mb-3 bg-white border border-success-subtle rounded-3 shadow-sm mx-0 overflow-x-auto">
     <div class="d-flex align-items-center gap-1">
         <span class="badge bg-success-subtle text-success-emphasis p-2 fs-6 rounded-3">
-            <i class="bi bi-funnel-fill"></i> 
+            <i class="bi bi-funnel-fill"></i>
         </span>
     </div>
-    
+
     <!-- Buscador -->
     <div class="flex-grow-1" style="min-width: 220px; max-width: 320px;">
         <div class="input-group input-group-sm">
-            <span class="input-group-text bg-success-subtle border-success-subtle fw-semibold text-success-emphasis" style="font-size: 0.8rem;">
+            <span class="input-group-text bg-success-subtle border-success-subtle fw-semibold text-success-emphasis"
+                style="font-size: 0.8rem;">
                 <i class="bi bi-search me-1"></i> Buscar:
             </span>
             <input id="buscarFiltro" type="text" class="form-control border-success-subtle" style="font-size: 0.85rem;"
@@ -66,8 +84,10 @@
     <!-- Filtro Cod Sustento -->
     <div class="flex-grow-1" style="min-width: 130px; max-width: 175px;">
         <div class="input-group input-group-sm">
-            <span class="input-group-text bg-success-subtle border-success-subtle fw-semibold text-success-emphasis" style="font-size: 0.8rem;">Cód. Sust:</span>
-            <select class="form-select border-success-subtle" [(ngModel)]="filtroCodSustento" (change)="aplicarFiltros()" style="font-size: 0.85rem;">
+            <span class="input-group-text bg-success-subtle border-success-subtle fw-semibold text-success-emphasis"
+                style="font-size: 0.8rem;">Cód. Sust:</span>
+            <select class="form-select border-success-subtle" [(ngModel)]="filtroCodSustento"
+                (change)="aplicarFiltros()" style="font-size: 0.85rem;">
                 <option value="">Todos</option>
                 <option *ngFor="let val of uniqueCodSustento" [value]="val">{{ val }}</option>
             </select>
@@ -77,8 +97,10 @@
     <!-- Filtro Tipo ID -->
     <div class="flex-grow-1" style="min-width: 130px; max-width: 175px;">
         <div class="input-group input-group-sm">
-            <span class="input-group-text bg-success-subtle border-success-subtle fw-semibold text-success-emphasis" style="font-size: 0.8rem;">T. idProv:</span>
-            <select class="form-select border-success-subtle" [(ngModel)]="filtroTipoId" (change)="aplicarFiltros()" style="font-size: 0.85rem;">
+            <span class="input-group-text bg-success-subtle border-success-subtle fw-semibold text-success-emphasis"
+                style="font-size: 0.8rem;">T. idProv:</span>
+            <select class="form-select border-success-subtle" [(ngModel)]="filtroTipoId" (change)="aplicarFiltros()"
+                style="font-size: 0.85rem;">
                 <option value="">Todos</option>
                 <option *ngFor="let val of uniqueTipoId" [value]="val">{{ val }}</option>
             </select>
@@ -88,8 +110,10 @@
     <!-- Filtro Tipo Comp -->
     <div class="flex-grow-1" style="min-width: 130px; max-width: 175px;">
         <div class="input-group input-group-sm">
-            <span class="input-group-text bg-success-subtle border-success-subtle fw-semibold text-success-emphasis" style="font-size: 0.8rem;">T. Comp:</span>
-            <select class="form-select border-success-subtle" [(ngModel)]="filtroTipoComp" (change)="aplicarFiltros()" style="font-size: 0.85rem;">
+            <span class="input-group-text bg-success-subtle border-success-subtle fw-semibold text-success-emphasis"
+                style="font-size: 0.8rem;">T. Comp:</span>
+            <select class="form-select border-success-subtle" [(ngModel)]="filtroTipoComp" (change)="aplicarFiltros()"
+                style="font-size: 0.85rem;">
                 <option value="">Todos</option>
                 <option *ngFor="let val of uniqueTipoComp" [value]="val">{{ val }}</option>
             </select>
@@ -99,10 +123,27 @@
     <!-- Filtro Cod Retencion -->
     <div class="flex-grow-1" style="min-width: 130px; max-width: 175px;">
         <div class="input-group input-group-sm">
-            <span class="input-group-text bg-success-subtle border-success-subtle fw-semibold text-success-emphasis" style="font-size: 0.8rem;">Cód. Ret:</span>
-            <select class="form-select border-success-subtle" [(ngModel)]="filtroCodRetencion" (change)="aplicarFiltros()" style="font-size: 0.85rem;">
+            <span class="input-group-text bg-success-subtle border-success-subtle fw-semibold text-success-emphasis"
+                style="font-size: 0.8rem;">Cód. Ret:</span>
+            <select class="form-select border-success-subtle" [(ngModel)]="filtroCodRetencion"
+                (change)="aplicarFiltros()" style="font-size: 0.85rem;">
                 <option value="">Todos</option>
                 <option *ngFor="let val of uniqueCodRetencion" [value]="val">{{ val }}</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Filtro retencion (bien serv) -->
+    <div class="flex-grow-1" style="min-width: 130px; max-width: 175px;">
+        <div class="input-group input-group-sm">
+            <span class="input-group-text bg-success-subtle border-success-subtle fw-semibold text-success-emphasis"
+                style="font-size: 0.8rem;">T. Ret:</span>
+            <select class="form-select border-success-subtle" [(ngModel)]="filtroBienesServ" (change)="aplicarFiltros()"
+                style="font-size: 0.85rem;">
+                <option value="">Todos</option>
+                <option value="bienes">Bienes</option>
+                <option value="servicios_exc_iva">Servicios exc IVA</option>
+                <option value="servicios_con_iva">Servicios con IVA</option>
             </select>
         </div>
     </div>
@@ -112,7 +153,8 @@
         <div class="form-check form-switch mb-0">
             <input class="form-check-input" type="checkbox" role="switch" id="switchAutRetMalFormed"
                 [(ngModel)]="filtroAutRetMalFormed" (change)="aplicarFiltros()" style="cursor: pointer;">
-            <label class="form-check-label fw-semibold text-danger-emphasis d-inline-flex align-items-center" for="switchAutRetMalFormed" style="font-size: 0.85rem; cursor: pointer;">
+            <label class="form-check-label fw-semibold text-danger-emphasis d-inline-flex align-items-center"
+                for="switchAutRetMalFormed" style="font-size: 0.85rem; cursor: pointer;">
                 <i class="bi bi-exclamation-triangle-fill text-danger me-1"></i> Aut ret. Mal Formadas
             </label>
         </div>
@@ -123,8 +165,10 @@
 <div *ngIf="!cargando" class="row g-2 mb-3 w-100 mx-0">
     <!-- Fila 1: Bases y Monto IVA -->
     <div class="col-12 col-md-4">
-        <div class="card border-0 shadow-sm bg-white p-3 rounded-3 d-flex flex-column h-100" style="border-left: 4px solid #198754 !important;">
-            <span class="text-muted small fw-semibold text-uppercase"><i class="bi bi-cash-stack text-success"></i> Bases e Impuestos</span>
+        <div class="card border-0 shadow-sm bg-white p-3 rounded-3 d-flex flex-column h-100"
+            style="border-left: 4px solid #198754 !important;">
+            <span class="text-muted small fw-semibold text-uppercase"><i class="bi bi-cash-stack text-success"></i>
+                Bases e Impuestos</span>
             <div class="d-flex justify-content-between mt-2 fs-7">
                 <span>Base 0%:</span>
                 <span class="fw-bold text-dark">{{ totalBaseImponible | currency:'USD':'symbol':'1.2-2' }}</span>
@@ -142,8 +186,10 @@
 
     <!-- Fila 2: Retenciones (Bienes, Servicios, IVA 100%) -->
     <div class="col-12 col-md-4">
-        <div class="card border-0 shadow-sm bg-white p-3 rounded-3 d-flex flex-column h-100" style="border-left: 4px solid #dc3545 !important;">
-            <span class="text-muted small fw-semibold text-uppercase"><i class="bi bi-file-earmark-diff text-danger"></i> Retenciones (Bienes / Servicios)</span>
+        <div class="card border-0 shadow-sm bg-white p-3 rounded-3 d-flex flex-column h-100"
+            style="border-left: 4px solid #dc3545 !important;">
+            <span class="text-muted small fw-semibold text-uppercase"><i
+                    class="bi bi-file-earmark-diff text-danger"></i> Retenciones (Bienes / Servicios)</span>
             <div class="d-flex justify-content-between mt-2 fs-7">
                 <span>Ret. Bienes:</span>
                 <span class="fw-bold text-danger">{{ totalRetBienes | currency:'USD':'symbol':'1.2-2' }}</span>
@@ -161,8 +207,10 @@
 
     <!-- Fila 3: Detalle AIR (Bases y Retenciones) -->
     <div class="col-12 col-md-4">
-        <div class="card border-0 shadow-sm bg-white p-3 rounded-3 d-flex flex-column h-100" style="border-left: 4px solid #0d6efd !important;">
-            <span class="text-muted small fw-semibold text-uppercase"><i class="bi bi-pie-chart text-primary"></i> Ret. Fuente (AIR)</span>
+        <div class="card border-0 shadow-sm bg-white p-3 rounded-3 d-flex flex-column h-100"
+            style="border-left: 4px solid #0d6efd !important;">
+            <span class="text-muted small fw-semibold text-uppercase"><i class="bi bi-pie-chart text-primary"></i> Ret.
+                Fuente (AIR)</span>
             <div class="d-flex justify-content-between mt-2 fs-7">
                 <span>Base Imp. AIR:</span>
                 <span class="fw-bold text-primary">{{ totalBaseImpAir | currency:'USD':'symbol':'1.2-2' }}</span>
@@ -174,6 +222,7 @@
         </div>
     </div>
 </div>
+</ng-container>
 
 <div style="display: flex; align-items: start; gap: 15px; width: 100%;">
     <div style="white-space: nowrap; width: 100%;">
@@ -188,7 +237,7 @@
                 <p class="text-muted small mb-0">Por favor, espere un momento.</p>
             </div>
 
-            <div *ngIf="!cargando" class="premium-table-card table-responsive">
+            <div *ngIf="!cargando && vistaActiva === 'listado'" class="premium-table-card table-responsive">
                 <table class="premium-table">
                     <thead style="text-align: center; vertical-align: middle;">
                         <tr>
@@ -199,16 +248,75 @@
                             <th rowspan="2" style="border-right: 1px solid rgba(255,255,255,0.15);">Razon Social</th>
                             <th rowspan="2" style="border-right: 1px solid rgba(255,255,255,0.15);">T. Comp</th>
                             <th rowspan="2" style="border-right: 1px solid rgba(255,255,255,0.15);">Parte Rel</th>
-                            <th colspan="3" style="border-bottom: 1px solid rgba(255,255,255,0.25); border-right: 1px solid rgba(255,255,255,0.15); padding-bottom: 6px;">Factura</th>
+                            <th colspan="3"
+                                style="border-bottom: 1px solid rgba(255,255,255,0.25); border-right: 1px solid rgba(255,255,255,0.15); padding-bottom: 6px;">
+                                Factura</th>
                             <th rowspan="2" style="border-right: 1px solid rgba(255,255,255,0.15);">F. Emisión</th>
                             <th rowspan="2" style="border-right: 1px solid rgba(255,255,255,0.15);">F. Registro</th>
                             <th rowspan="2" style="border-right: 1px solid rgba(255,255,255,0.15);">Aut</th>
-                            <th rowspan="2">F. Pago</th>
+                            <th rowspan="2" style="border-right: 1px solid rgba(255,255,255,0.15);">F. Pago</th>
+                            <th colspan="6"
+                                style="border-bottom: 1px solid rgba(255,255,255,0.25); border-right: 1px solid rgba(255,255,255,0.15); padding-bottom: 6px;">
+                                Bases e impuestos</th>
+                            <th colspan="4"
+                                style="border-bottom: 1px solid rgba(255,255,255,0.25); border-right: 1px solid rgba(255,255,255,0.15); padding-bottom: 6px;">
+                                Retención IVA</th>
+                            <th colspan="4"
+                                style="border-bottom: 1px solid rgba(255,255,255,0.25); border-right: 1px solid rgba(255,255,255,0.15); padding-bottom: 6px;">
+                                Detalle AIR</th>
                         </tr>
                         <tr>
-                            <th style="padding-top: 6px; padding-bottom: 8px ; border-right: 1px solid rgba(255,255,255,0.15);">Estab</th>
-                            <th style="padding-top: 6px; padding-bottom: 8px ; border-right: 1px solid rgba(255,255,255,0.15);">Pt. Emi</th>
-                            <th style="padding-top: 6px; padding-bottom: 8px ; border-right: 1px solid rgba(255,255,255,0.15);">Secuencial</th>
+                            <th
+                                style="padding-top: 6px; padding-bottom: 8px ; border-right: 1px solid rgba(255,255,255,0.15);">
+                                Estab</th>
+                            <th
+                                style="padding-top: 6px; padding-bottom: 8px ; border-right: 1px solid rgba(255,255,255,0.15);">
+                                Pt. Emi</th>
+                            <th
+                                style="padding-top: 6px; padding-bottom: 8px ; border-right: 1px solid rgba(255,255,255,0.15);">
+                                Secuencial</th>
+                            <th
+                                style="padding-top: 6px; padding-bottom: 8px ; border-right: 1px solid rgba(255,255,255,0.15);">
+                                Base imp. 0%</th>
+                            <th
+                                style="padding-top: 6px; padding-bottom: 8px ; border-right: 1px solid rgba(255,255,255,0.15);">
+                                Base imp. Grav</th>
+                            <th
+                                style="padding-top: 6px; padding-bottom: 8px ; border-right: 1px solid rgba(255,255,255,0.15);">
+                                Base no obj. IVA</th>
+                            <th
+                                style="padding-top: 6px; padding-bottom: 8px ; border-right: 1px solid rgba(255,255,255,0.15);">
+                                Base ex. IVA</th>
+                            <th
+                                style="padding-top: 6px; padding-bottom: 8px ; border-right: 1px solid rgba(255,255,255,0.15);">
+                                Monto ICE</th>
+                            <th
+                                style="padding-top: 6px; padding-bottom: 8px ; border-right: 1px solid rgba(255,255,255,0.15);">
+                                Monto IVA</th>
+                            <th
+                                style="padding-top: 6px; padding-bottom: 8px ; border-right: 1px solid rgba(255,255,255,0.15);">
+                                % Ret. Bien</th>
+                            <th
+                                style="padding-top: 6px; padding-bottom: 8px ; border-right: 1px solid rgba(255,255,255,0.15);">
+                                Val. Ret. Bien</th>
+                            <th
+                                style="padding-top: 6px; padding-bottom: 8px ; border-right: 1px solid rgba(255,255,255,0.15);">
+                                % Ret. Serv</th>
+                            <th
+                                style="padding-top: 6px; padding-bottom: 8px ; border-right: 1px solid rgba(255,255,255,0.15);">
+                                Val. Ret. Serv</th>
+                            <th
+                                style="padding-top: 6px; padding-bottom: 8px ; border-right: 1px solid rgba(255,255,255,0.15);">
+                                Cód. Ret.</th>
+                            <th
+                                style="padding-top: 6px; padding-bottom: 8px ; border-right: 1px solid rgba(255,255,255,0.15);">
+                                Base Imp.</th>
+                            <th
+                                style="padding-top: 6px; padding-bottom: 8px ; border-right: 1px solid rgba(255,255,255,0.15);">
+                                % Ret.</th>
+                            <th
+                                style="padding-top: 6px; padding-bottom: 8px ; border-right: 1px solid rgba(255,255,255,0.15);">
+                                Val. Ret.</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -223,8 +331,7 @@
                                         title="Ver reembolsos, retenciones y bases">
                                         <i class="bi bi-info-circle-fill"></i>
                                     </button>
-                                    <i *ngIf="isAutRetMalformed(ats)"
-                                        class="bi bi-exclamation-circle-fill text-danger"
+                                    <i *ngIf="isAutRetMalformed(ats)" class="bi bi-exclamation-circle-fill text-danger"
                                         style="font-size: 0.8rem; cursor: default;"
                                         title="Revisar Autorización de retención">
                                     </i>
@@ -268,29 +375,88 @@
                                 <i *ngIf="ats.autorizacion" class="bi bi-check-lg text-success"
                                     style="font-size: 1.25rem;" [title]="ats.autorizacion"></i>
                                 <!-- X roja si no hay autorización -->
-                                <i *ngIf="!ats.autorizacion" class="bi bi-x-lg text-danger" style="font-size: 1.25rem;"></i>
+                                <i *ngIf="!ats.autorizacion" class="bi bi-x-lg text-danger"
+                                    style="font-size: 1.25rem;"></i>
                             </td>
                             <td class="text-center">
                                 {{ ats.formaPago01 }}
                             </td>
+                            <td class="text-end font-monospace" style="font-size: 0.8rem;">
+                                {{ ats.baseImponible | currency:'USD':'symbol':'1.2-2' }}
+                            </td>
+                            <td class="text-end font-monospace" style="font-size: 0.8rem;">
+                                {{ ats.baseimpgrav | currency:'USD':'symbol':'1.2-2' }}
+                            </td>
+                            <td class="text-end font-monospace" style="font-size: 0.8rem;">
+                                {{ ats.baseNoGraIva | currency:'USD':'symbol':'1.2-2' }}
+                            </td>
+                            <td class="text-end font-monospace" style="font-size: 0.8rem;">
+                                {{ ats.baseImpExe | currency:'USD':'symbol':'1.2-2' }}
+                            </td>
+                            <td class="text-end font-monospace" style="font-size: 0.8rem;">
+                                {{ ats.montoIce | currency:'USD':'symbol':'1.2-2' }}
+                            </td>
+                            <td class="text-end font-monospace" style="font-size: 0.8rem;">
+                                {{ ats.montoIva | currency:'USD':'symbol':'1.2-2' }}
+                            </td>
+                            <td class="text-center font-monospace" style="font-size: 0.8rem; border-left: 1px solid rgba(0,0,0,0.05);">
+                                {{ getPorcentajeIVA(ats, 'bien') }}
+                            </td>
+                            <td class="text-end font-monospace" style="font-size: 0.8rem;">
+                                {{ getValorIVA(ats, 'bien') | currency:'USD':'symbol':'1.2-2' }}
+                            </td>
+                            <td class="text-center font-monospace" style="font-size: 0.8rem;">
+                                {{ getPorcentajeIVA(ats, 'servicio') }}
+                            </td>
+                            <td class="text-end font-monospace" style="font-size: 0.8rem; border-right: 1px solid rgba(0,0,0,0.05);">
+                                {{ getValorIVA(ats, 'servicio') | currency:'USD':'symbol':'1.2-2' }}
+                            </td>
+                            <td class="text-center font-monospace" style="font-size: 0.8rem;">
+                                <div *ngFor="let ret of ats.detallesRetencion" class="py-1">
+                                    {{ ret.codRetAir }}
+                                </div>
+                            </td>
+                            <td class="text-end font-monospace" style="font-size: 0.8rem;">
+                                <div *ngFor="let ret of ats.detallesRetencion" class="py-1">
+                                    {{ ret.baseImpAir | currency:'USD':'symbol':'1.2-2' }}
+                                </div>
+                            </td>
+                            <td class="text-center font-monospace" style="font-size: 0.8rem;">
+                                <div *ngFor="let ret of ats.detallesRetencion" class="py-1">
+                                    {{ ret.porcentajeAir | number:'1.0-2' }}%
+                                </div>
+                            </td>
+                            <td class="text-end font-monospace" style="font-size: 0.8rem; border-right: 1px solid rgba(0,0,0,0.05);">
+                                <div *ngFor="let ret of ats.detallesRetencion" class="py-1 text-danger fw-bold">
+                                    {{ ret.valRetAir | currency:'USD':'symbol':'1.2-2' }}
+                                </div>
+                            </td>
                         </tr>
                         <tr *ngIf="atsDataFiltrada.length === 0">
-                            <td colspan="14" class="text-center text-muted py-3">
+                            <td colspan="28" class="text-center text-muted py-3">
                                 No se encontraron registros de ATs para los criterios seleccionados.
                             </td>
                         </tr>
                     </tbody>
                     <tfoot>
                         <tr>
-                            <td colspan="14" class="text-center py-2 bg-light">
-                                <pagination-controls (pageChange)="paginaActual = $event" [autoHide]="true" [maxSize]="15"
-                                    previousLabel="«" nextLabel="»">
+                            <td colspan="28" class="text-center py-2 bg-light">
+                                <pagination-controls (pageChange)="paginaActual = $event" [autoHide]="true"
+                                    [maxSize]="15" previousLabel="«" nextLabel="»">
                                 </pagination-controls>
                             </td>
                         </tr>
                     </tfoot>
                 </table>
             </div>
+
+            <!-- Vista de Reporte Resumen -->
+            <app-ats-reporte *ngIf="!cargando && vistaActiva === 'reporte'" 
+                [atsData]="atsData" 
+                [mes]="mesSeleccionado" 
+                [anio]="anioSeleccionado" 
+                [empresaNombre]="getNombreEmpresaSeleccionada()">
+            </app-ats-reporte>
         </div>
     </div>
 </div>
@@ -475,20 +641,23 @@
                                                     facturaSeleccionada.detallesRetencion[0].NoReten }}</div>
                                                 <div class="col-md-4"><strong>Fecha Emisión:</strong> {{
                                                     facturaSeleccionada.detallesRetencion[0].FchRete }}</div>
-                                                
+
                                                 <!-- Vista de lectura de Autorización -->
                                                 <div class="col-md-4" *ngIf="!editandoAut">
                                                     <div class="d-flex align-items-start gap-1">
                                                         <div class="flex-grow-1">
                                                             <strong>Autorización:</strong>
-                                                            <span class="text-break font-monospace d-block text-secondary" style="font-size: 0.75rem;">
+                                                            <span
+                                                                class="text-break font-monospace d-block text-secondary"
+                                                                style="font-size: 0.75rem;">
                                                                 {{ facturaSeleccionada.detallesRetencion[0].AutoriRet }}
                                                             </span>
                                                         </div>
-                                                        <button *ngIf="isAutRetMalformed(facturaSeleccionada)" 
-                                                            class="btn btn-sm btn-outline-primary p-1 border-0" 
+                                                        <button *ngIf="isAutRetMalformed(facturaSeleccionada)"
+                                                            class="btn btn-sm btn-outline-primary p-1 border-0"
                                                             (click)="activarEdicion()" title="Editar autorización">
-                                                            <i class="bi bi-pencil-square" style="font-size: 0.95rem;"></i>
+                                                            <i class="bi bi-pencil-square"
+                                                                style="font-size: 0.95rem;"></i>
                                                         </button>
                                                     </div>
                                                 </div>
@@ -497,17 +666,22 @@
                                                 <div class="col-md-4" *ngIf="editandoAut">
                                                     <strong>Autorización:</strong>
                                                     <div class="input-group input-group-sm mt-1 shadow-sm">
-                                                        <input type="text" class="form-control font-monospace" 
-                                                            [(ngModel)]="tempAut" style="font-size: 0.72rem;" 
-                                                            placeholder="Ingrese número de autorización" [disabled]="cargandoEdicion"
-                                                            maxlength="49" pattern="[0-9]*" inputmode="numeric">
-                                                        <button class="btn btn-success btn-sm" type="button" (click)="guardarEdicion()" 
-                                                            [disabled]="cargandoEdicion" title="Guardar">
+                                                        <input type="text" class="form-control font-monospace"
+                                                            [(ngModel)]="tempAut" style="font-size: 0.72rem;"
+                                                            placeholder="Ingrese número de autorización"
+                                                            [disabled]="cargandoEdicion" maxlength="49" pattern="[0-9]*"
+                                                            inputmode="numeric">
+                                                        <button class="btn btn-success btn-sm" type="button"
+                                                            (click)="guardarEdicion()" [disabled]="cargandoEdicion"
+                                                            title="Guardar">
                                                             <i *ngIf="!cargandoEdicion" class="bi bi-check-lg"></i>
-                                                            <span *ngIf="cargandoEdicion" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                                            <span *ngIf="cargandoEdicion"
+                                                                class="spinner-border spinner-border-sm" role="status"
+                                                                aria-hidden="true"></span>
                                                         </button>
-                                                        <button class="btn btn-danger btn-sm" type="button" (click)="cancelarEdicion()" 
-                                                            [disabled]="cargandoEdicion" title="Cancelar">
+                                                        <button class="btn btn-danger btn-sm" type="button"
+                                                            (click)="cancelarEdicion()" [disabled]="cargandoEdicion"
+                                                            title="Cancelar">
                                                             <i class="bi bi-x-lg"></i>
                                                         </button>
                                                     </div>

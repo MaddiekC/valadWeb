@@ -1,0 +1,70 @@
+<div class="reporte-print-container bg-white p-4 rounded-3 shadow-sm border border-success-subtle mb-4">
+  <div class="d-flex justify-content-between align-items-center mb-3 no-print">
+    <h5 class="m-0 text-success fw-bold">
+      <i class="bi bi-file-earmark-bar-graph"></i> Reporte Resumen de Retenciones
+    </h5>
+    <button class="btn btn-success btn-sm d-inline-flex align-items-center gap-1" (click)="imprimir()">
+      <i class="bi bi-printer-fill"></i> Imprimir Reporte
+    </button>
+  </div>
+
+  <div class="reporte-header">
+    <div class="reporte-title">{{ empresaNombre || 'EMPRESA SELECCIONADA' }}</div>
+    <div class="reporte-subtitle d-flex justify-content-between mt-1">
+      <span><strong>Reporte de Retenciones en la Fuente de Impuesto a la Renta (AIR)</strong></span>
+      <span><strong>Período:</strong> {{ mes }}/{{ anio }}</span>
+    </div>
+  </div>
+
+  <table class="reporte-table table table-bordered mt-3">
+    <thead>
+      <tr>
+        <th class="text-start py-2" style="width: 70%; background-color: #0b3c5d; color: #fff;">Concepto de Retención (Código)</th>
+        <th class="text-end py-2" style="width: 15%; background-color: #0b3c5d; color: #fff;">BASE IMPONIBLE</th>
+        <th class="text-end py-2" style="width: 15%; background-color: #0b3c5d; color: #fff;">VALOR RETENIDO</th>
+      </tr>
+    </thead>
+    <tbody>
+      <ng-container *ngFor="let grupo of grupos">
+        <!-- Título del Grupo -->
+        <tr class="grupo-titulo-row">
+          <td colspan="3" class="py-2 px-3 fw-bold">{{ grupo.titulo }}</td>
+        </tr>
+        
+        <!-- Items del Grupo -->
+        <ng-container *ngFor="let item of grupo.items">
+          <!-- Si es subtítulo (por ejemplo "Servicios") -->
+          <tr *ngIf="item.esSubtitulo" class="subtitulo-row">
+            <td colspan="3" class="py-1 px-4 fw-semibold text-secondary">{{ item.concepto }}</td>
+          </tr>
+          
+          <!-- Si es un item normal -->
+          <tr *ngIf="!item.esSubtitulo">
+            <td class="px-4 text-start text-dark">
+              {{ item.concepto }} <span class="text-muted fw-bold font-monospace">({{ item.codigo }})</span>
+            </td>
+            <!-- Base Imponible -->
+            <td class="text-end font-monospace text-dark">
+              {{ item.baseImponible | currency:'USD':'symbol':'1.2-2' }}
+            </td>
+            <!-- Valor Retenido -->
+            <td class="text-end font-monospace fw-bold text-success">
+              {{ item.valorRetenido | currency:'USD':'symbol':'1.2-2' }}
+            </td>
+          </tr>
+        </ng-container>
+      </ng-container>
+
+      <!-- Fila de Total General -->
+      <tr class="total-general-row">
+        <td class="text-start fw-bold py-2 px-3">TOTAL GENERAL DE RETENCIONES</td>
+        <td class="text-end font-monospace fw-bold py-2">
+          {{ totalGeneralBase | currency:'USD':'symbol':'1.2-2' }}
+        </td>
+        <td class="text-end font-monospace fw-bold text-success py-2">
+          {{ totalGeneralRetenido | currency:'USD':'symbol':'1.2-2' }}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
