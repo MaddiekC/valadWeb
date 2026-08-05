@@ -30,6 +30,7 @@ Route::group(
         Route::get('/empresas/{id}', [EmpresaController::class, 'show']); 
         
         Route::post('/ats/procesar', [AtsController::class, 'procesarAts']);
+        Route::get('/ats/catalogo-retenciones', [AtsController::class, 'obtenerCatalogoRetenciones']);
         Route::put('/ats/retencion/autorizacion', [AtsController::class, 'actualizarAutorizacionRetencion']);
         Route::get('/pagosCheques', [DetallePagoController::class, 'listarCheques']);
     
@@ -39,5 +40,7 @@ Route::group(
         Route::get('/transacciones', [UserController::class, 'getTransacciones']); // Listar todas las transacciones/permisos
         Route::get('/usuarios/{id}/transacciones', [UserController::class, 'getUserTransacciones']); // Listar permisos de un usuario
         Route::put('/usuarios/{id}/transacciones', [UserController::class, 'updateUserTransacciones']); // Actualizar permisos de un usuario
+        Route::get('/usuarios/{id}/empresas', [UserController::class, 'getUserEmpresas']); // Listar empresas autorizadas de un usuario
+        Route::put('/usuarios/{id}/empresas', [UserController::class, 'updateUserEmpresas']); // Actualizar empresas autorizadas de un usuario
     }
 );

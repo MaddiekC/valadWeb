@@ -385,5 +385,34 @@ class AtsController extends Controller
             ], 500);
         }
     }
+
+    public function obtenerCatalogoRetenciones()
+    {
+        try {
+            $catalogo = DB::table('ats_retenciones as r')
+                ->leftJoin('ats_retenciones_titulos as t', 'r.titulo_id', '=', 't.id')
+                ->leftJoin('ats_retenciones_subtitulos as s', 'r.subtitulo_id', '=', 's.id')
+                ->select([
+                    'r.codigo',
+                    'r.concepto',
+                    't.nombre as titulo_nombre',
+                    's.nombre as subtitulo_nombre'
+                ])
+                ->orderBy('t.id')
+                ->orderBy('s.id')
+                ->orderBy('r.codigo')
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $catalogo
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener el catálogo de retenciones: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }
 

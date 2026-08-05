@@ -139,5 +139,74 @@ class UserController extends Controller
             return response()->json(['message' => 'Error interno al actualizar permisos del usuario: ' . $e->getMessage()], 500);
         }
     }
+
+    public function getUserEmpresas($id)
+    {
+        try {
+            $user = User::findOrFail($id);
+            $empresaIds = DB::table('usuarioEmpresa')
+                ->where('Id_Usuario', $id)
+                ->where('Estado', 1)
+                ->pluck('Id_Empresa')
+                ->map(fn($id) => (int)$id);
+            return response()->json($empresaIds);
+        } catch (\Throwable $e) {
+            Log::error('Error al obtener empresas de usuario: ' . $e->getMessage());
+            return response()->json(['message' => 'Error interno al obtener empresas del usuario'], 500);
+        }
+    }
+
+    public function updateUserEmpresas(Request $request, $id)
+    {
+        try {
+            $user = User::findOrFail($id);
+            $empresaIds = $request->input('empresas', []);
+            if (!is_array($empresaIds)) {
+                return response()->json(['message' => 'Formato de empresas inválido'], 420);
+            }
+
+            $requestedIds = array_map('intval', $empresaIds);
+
+            // Fetch existing pivot rows for this user: array of [Id_Empresa => Estado]
+            $existingPivot = DB::table('usuarioEmpresa')
+                ->where('Id_Usuario', $id)
+                ->pluck('Estado', 'Id_Empresa')
+                ->toArray();
+
+            DB::beginTransaction();
+
+            // 1. Update existing entries
+            foreach ($existingPivot as $empId => $estado) {
+                // If the company ID is in the requested array, set active (1), otherwise inactive (0)
+                $newEstado = in_array((int)$empId, $requestedIds) ? 1 : 0;
+                if ((int)$estado !== $newEstado) {
+                    DB::table('usuarioEmpresa')
+                        ->where('Id_Usuario', $id)
+                        ->where('Id_Empresa', $empId)
+                        ->update(['Estado' => $newEstado]);
+                }
+            }
+
+            // 2. Insert new entries
+            foreach ($requestedIds as $empId) {
+                if (!array_key_exists($empId, $existingPivot)) {
+                    DB::table('usuarioEmpresa')->insert([
+                        'Id_Usuario' => $id,
+                        'Id_Empresa' => $empId,
+                        'Estado' => 1,
+                        'Fecha_Registro' => now()
+                    ]);
+                }
+            }
+
+            DB::commit();
+
+            return response()->json(['message' => 'Empresas autorizadas actualizadas correctamente']);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            Log::error('Error al actualizar empresas de usuario: ' . $e->getMessage());
+            return response()->json(['message' => 'Error interno al actualizar empresas del usuario: ' . $e->getMessage()], 500);
+        }
+    }
 }
 
