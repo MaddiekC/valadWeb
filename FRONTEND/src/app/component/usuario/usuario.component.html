@@ -43,6 +43,9 @@
                         </span>
                     </td>
                     <td class="text-center">
+                        <button class="btn btnAngosto me-1" data-bs-toggle="tooltip" title="Gestionar Empresas" (click)="openEmpresasModal(user)" *ngIf="user.estado === 'A'">
+                            <i class="bi bi-building text-success"></i>
+                        </button>
                         <button class="btn btnAngosto me-1" data-bs-toggle="tooltip" title="Gestionar Permisos" (click)="openPermisosModal(user)" *ngIf="user.estado === 'A'">
                             <i class="bi bi-shield-lock text-primary"></i>
                         </button>
@@ -184,6 +187,67 @@
                 <button type="button" class="btn btn-primary px-4 d-flex align-items-center" (click)="onSavePermisos()" [disabled]="loadingPermisos || savingPermisos">
                     <span *ngIf="savingPermisos" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
                     <i *ngIf="!savingPermisos" class="bi bi-save me-2"></i>Guardar Permisos
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Gestionar Empresas Autorizadas -->
+<div class="modal fade" tabindex="-1" aria-labelledby="empresasModalLabel" aria-hidden="true" #empresasModal>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow-lg border-0 rounded-3">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="empresasModalLabel">
+                    <i class="bi bi-building-fill me-2"></i>Empresas del Usuario: <strong class="text-warning">{{ selectedUser?.username }}</strong>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div *ngIf="empresasError" class="alert alert-danger" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ empresasError }}
+                </div>
+                
+                <div *ngIf="loadingEmpresas" class="text-center py-4">
+                    <div class="spinner-border text-success" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                    <p class="mt-2 text-muted">Cargando empresas autorizadas...</p>
+                </div>
+
+                <div *ngIf="!loadingEmpresas">
+                    <p class="text-muted mb-3">Selecciona las empresas a las que este usuario tendrá autorización de ingresar:</p>
+                    
+                    <div class="list-group">
+                        <label *ngFor="let emp of empresasDisponibles" 
+                               class="list-group-item list-group-item-action d-flex align-items-center justify-content-between p-3 border rounded mb-2 shadow-sm"
+                               style="cursor: pointer; transition: all 0.2s ease;">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-building text-success me-3 fs-5"></i>
+                                <div>
+                                    <h6 class="mb-0 fw-bold">{{ emp.nombre }}</h6>
+                                    <small class="text-muted">Abreviatura: {{ emp.abreviatura }} | ID: {{ emp.idEmpresa }}</small>
+                                </div>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch"
+                                       [id]="'emp_' + emp.idEmpresa"
+                                       [checked]="isEmpresaSelected(emp.idEmpresa)"
+                                       (change)="toggleEmpresa(emp.idEmpresa)">
+                            </div>
+                        </label>
+                    </div>
+
+                    <div *ngIf="empresasDisponibles.length === 0" class="text-center py-3">
+                        <p class="text-warning"><i class="bi bi-exclamation-circle me-1"></i>No se encontraron empresas configuradas en el sistema.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal" [disabled]="savingEmpresas">Cerrar</button>
+                <button type="button" class="btn btn-success text-white px-4 d-flex align-items-center" (click)="onSaveEmpresas()" [disabled]="loadingEmpresas || savingEmpresas">
+                    <span *ngIf="savingEmpresas" class="spinner-border spinner-border-sm text-white me-2" role="status" aria-hidden="true"></span>
+                    <i *ngIf="!savingEmpresas" class="bi bi-save me-2"></i>Guardar Permisos
                 </button>
             </div>
         </div>

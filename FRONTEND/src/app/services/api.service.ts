@@ -63,6 +63,18 @@ export class ApiService {
     return this.http.put(`${this.baseUrl}/usuarios/${id}/transacciones`, { transacciones: transaccionIds });
   }
 
+  getUserEmpresas(id: number): Observable<any> {
+    return this.http.get(`${this.baseUrl}/usuarios/${id}/empresas`);
+  }
+
+  updateUserEmpresas(id: number, empresaIds: any[]): Observable<any> {
+    return this.http.put(`${this.baseUrl}/usuarios/${id}/empresas`, { empresas: empresaIds });
+  }
+
+  getEmpresasParaAsignar(): Observable<any> {
+    return this.http.get(`${this.baseUrl}/empresas?all=true`);
+  }
+
   actualizarAutorizacionRetencion(params: {
     empresa_id: string | number;
     id_fila: string;

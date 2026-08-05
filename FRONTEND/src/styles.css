@@ -31,3 +31,49 @@ table {
   width: 100% !important;
   table-layout: auto; /* o fixed, si prefieres que todas las columnas tengan igual ancho */
 }
+
+/* Estilos de Impresión Globales */
+@media print {
+  @page {
+    margin: 0;
+  }
+
+  html {
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  body {
+    padding: 1.5cm !important;
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* Ocultar elementos de navegación y de UI que no pertenecen al reporte */
+  .no-print,
+  app-nav,
+  .sidebar-wrapper,
+  .page-header {
+    display: none !important;
+  }
+
+  /* Resetear espaciados, márgenes y deshabilitar scrolls del contenedor principal */
+  .main-container,
+  .content-wrapper-scroll,
+  .content-wrapper {
+    padding: 0 !important;
+    margin: 0 !important;
+    height: auto !important;
+    width: 100% !important;
+    overflow: visible !important;
+  }
+
+  /* Asegurar que todos los divs y contenedores del reporte no fuercen barras de desplazamiento */
+  .reporte-print-container,
+  .reporte-print-container * {
+    overflow: visible !important;
+    white-space: normal !important;
+  }
+}

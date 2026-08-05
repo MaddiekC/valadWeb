@@ -84,23 +84,13 @@
 }
 
 @media print {
-  body * {
-    visibility: hidden;
-  }
-  .reporte-print-container, .reporte-print-container * {
-    visibility: visible;
-  }
   .reporte-print-container {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
     border: none !important;
     box-shadow: none !important;
     padding: 0 !important;
-  }
-  .no-print {
-    display: none !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
   }
   
   /* Ensure backgrounds render during printing */

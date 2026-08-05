@@ -1,22 +1,48 @@
 <div class="reporte-print-container bg-white p-4 rounded-3 shadow-sm border border-success-subtle mb-4">
-  <div class="d-flex justify-content-between align-items-center mb-3 no-print">
-    <h5 class="m-0 text-success fw-bold">
-      <i class="bi bi-file-earmark-bar-graph"></i> Reporte Resumen de Retenciones
+  <!-- Cabecera de controles interactiva -->
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3 no-print">
+    <h5 class="m-0 text-success fw-bold d-flex align-items-center gap-2">
+      <i class="bi bi-file-earmark-bar-graph-fill"></i>
+      <span *ngIf="reporteActivo === 'retenciones'">Resumen de Retenciones</span>
+      <span *ngIf="reporteActivo === 'compras'">Resumen de Compras</span>
     </h5>
-    <button class="btn btn-success btn-sm d-inline-flex align-items-center gap-1" (click)="imprimir()">
-      <i class="bi bi-printer-fill"></i> Imprimir Reporte
-    </button>
-  </div>
+    
+    <div class="d-flex align-items-center gap-2 flex-wrap">
+      <!-- Selector de Tipo de Reporte (Estilo Premium Tabs/Pills) -->
+      <div class="btn-group btn-group-sm" role="group" aria-label="Selector de reporte">
+        <button type="button" class="btn btn-outline-success d-inline-flex align-items-center gap-1 fw-semibold"
+          [class.active]="reporteActivo === 'retenciones'" (click)="reporteActivo = 'retenciones'">
+          <i class="bi bi-scissors"></i> Retenciones
+        </button>
+        <button type="button" class="btn btn-outline-success d-inline-flex align-items-center gap-1 fw-semibold"
+          [class.active]="reporteActivo === 'compras'" (click)="reporteActivo = 'compras'">
+          <i class="bi bi-cart-fill"></i> Compras
+        </button>
+      </div>
 
-  <div class="reporte-header">
-    <div class="reporte-title">{{ empresaNombre || 'EMPRESA SELECCIONADA' }}</div>
-    <div class="reporte-subtitle d-flex justify-content-between mt-1">
-      <span><strong>Reporte de Retenciones en la Fuente de Impuesto a la Renta (AIR)</strong></span>
-      <span><strong>Período:</strong> {{ mes }}/{{ anio }}</span>
+      <button class="btn btn-success btn-sm d-inline-flex align-items-center gap-1 fw-semibold shadow-sm" (click)="imprimir()">
+        <i class="bi bi-printer-fill"></i> Imprimir
+      </button>
     </div>
   </div>
 
-  <table class="reporte-table table table-bordered mt-3">
+  <!-- Cabecera Oficial del Reporte para Impresión -->
+  <div class="reporte-header">
+    <div class="reporte-title">{{ empresaNombre || 'EMPRESA SELECCIONADA' }}</div>
+    <div class="reporte-subtitle d-flex justify-content-between align-items-end mt-1">
+      <span>
+        <strong *ngIf="reporteActivo === 'retenciones'">Reporte de Retenciones en la Fuente de Impuesto a la Renta (AIR)</strong>
+        <strong *ngIf="reporteActivo === 'compras'">Reporte Resumen de Compras por Sustento y Comprobante</strong>
+      </span>
+      <div class="text-end">
+        <div><strong>Período:</strong> {{ mes }}/{{ anio }}</div>
+        <div class="text-muted fw-semibold" style="font-size: 0.78rem;"><strong>Impreso el:</strong> {{ fechaImpresion }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABLA 1: Reporte Resumen de Retenciones -->
+  <table *ngIf="reporteActivo === 'retenciones'" class="reporte-table table table-bordered mt-3">
     <thead>
       <tr>
         <th class="text-start py-2" style="width: 70%; background-color: #0b3c5d; color: #fff;">Concepto de Retención (Código)</th>
@@ -63,6 +89,73 @@
         </td>
         <td class="text-end font-monospace fw-bold text-success py-2">
           {{ totalGeneralRetenido | currency:'USD':'symbol':'1.2-2' }}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- TABLA 2: Reporte Resumen de Compras -->
+  <table *ngIf="reporteActivo === 'compras'" class="reporte-table table table-bordered mt-3">
+    <thead>
+      <tr>
+        <th class="text-start py-2" style="background-color: #0b3c5d; color: #fff; width: 25%;">Cód. Sustento</th>
+        <th class="text-start py-2" style="background-color: #0b3c5d; color: #fff; width: 25%;">Tipo Comprobante</th>
+        <th class="text-end py-2" style="background-color: #0b3c5d; color: #fff; width: 12.5%;">Base Imp. 0%</th>
+        <th class="text-end py-2" style="background-color: #0b3c5d; color: #fff; width: 12.5%;">Base Imp. Grav.</th>
+        <th class="text-end py-2" style="background-color: #0b3c5d; color: #fff; width: 12.5%;">Base No Obj. IVA</th>
+        <th class="text-end py-2" style="background-color: #0b3c5d; color: #fff; width: 12.5%;">Monto IVA</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngIf="resumenCompras.length === 0">
+        <td colspan="6" class="text-center text-muted py-4">
+          No hay datos de compras disponibles para el período seleccionado.
+        </td>
+      </tr>
+      <ng-container *ngFor="let grupo of resumenCompras">
+        <tr *ngFor="let item of grupo.items; let idx = index">
+          <!-- Cód. Sustento (sólo en la primera fila del grupo con rowspan) -->
+          <td *ngIf="idx === 0" [rowSpan]="grupo.items.length" class="text-start text-dark align-middle border-end" style="background-color: #fafafa;">
+            <span class="fw-bold font-monospace bg-light border rounded px-1 text-dark" style="font-size: 0.85rem;">{{ grupo.codSustento }}</span>
+            <span class="ms-2 small text-muted text-break" style="font-size: 0.78rem;" [title]="getCodSustentoDesc(grupo.codSustento)">
+              {{ getCodSustentoDesc(grupo.codSustento) }}
+            </span>
+          </td>
+          <td class="text-start text-dark align-middle">
+            <span class="fw-bold font-monospace bg-light border rounded px-1 text-dark" style="font-size: 0.85rem;">{{ item.tipoComprobante }}</span>
+            <span class="ms-2 small text-muted text-break" style="font-size: 0.78rem;" [title]="getTipoComprobanteDesc(item.tipoComprobante)">
+              {{ getTipoComprobanteDesc(item.tipoComprobante) }}
+            </span>
+          </td>
+          <td class="text-end font-monospace text-dark align-middle" style="font-size: 0.82rem;">
+            {{ item.baseImp0 | currency:'USD':'':'1.2-2' }}
+          </td>
+          <td class="text-end font-monospace text-dark align-middle" style="font-size: 0.82rem;">
+            {{ item.baseImpGrava | currency:'USD':'':'1.2-2' }}
+          </td>
+          <td class="text-end font-monospace text-dark align-middle" style="font-size: 0.82rem;">
+            {{ item.baseNoObjIva | currency:'USD':'':'1.2-2' }}
+          </td>
+          <td class="text-end font-monospace fw-bold text-success-emphasis align-middle" style="font-size: 0.82rem;">
+            {{ item.montoIva | currency:'USD':'':'1.2-2' }}
+          </td>
+        </tr>
+      </ng-container>
+
+      <!-- Fila de Total General -->
+      <tr class="total-general-row" *ngIf="resumenCompras.length > 0">
+        <td colspan="2" class="text-start fw-bold py-2 px-3">TOTAL GENERAL</td>
+        <td class="text-end font-monospace fw-bold py-2" style="font-size: 0.85rem;">
+          {{ totalCompraBase0 | currency:'USD':'symbol':'1.2-2' }}
+        </td>
+        <td class="text-end font-monospace fw-bold py-2" style="font-size: 0.85rem;">
+          {{ totalCompraBaseGrava | currency:'USD':'symbol':'1.2-2' }}
+        </td>
+        <td class="text-end font-monospace fw-bold py-2" style="font-size: 0.85rem;">
+          {{ totalCompraBaseNoObj | currency:'USD':'symbol':'1.2-2' }}
+        </td>
+        <td class="text-end font-monospace fw-bold text-success py-2" style="font-size: 0.85rem;">
+          {{ totalCompraMontoIva | currency:'USD':'symbol':'1.2-2' }}
         </td>
       </tr>
     </tbody>

@@ -15,6 +15,19 @@ export interface ReporteGrupo {
   items: ReporteItem[];
 }
 
+export interface PurchaseSummaryDetail {
+  tipoComprobante: string;
+  baseImp0: number;
+  baseImpGrava: number;
+  baseNoObjIva: number;
+  montoIva: number;
+}
+
+export interface PurchaseSustentoGroup {
+  codSustento: string;
+  items: PurchaseSummaryDetail[];
+}
+
 @Component({
   selector: 'app-ats-reporte',
   standalone: true,
@@ -33,16 +46,29 @@ export class AtsReporteComponent implements OnInit, OnChanges {
   totalGeneralBase: number = 0;
   totalGeneralRetenido: number = 0;
   cargandoCatalogo: boolean = false;
+  fechaImpresion: string = '';
+
+  // Purchase summary fields
+  reporteActivo: 'retenciones' | 'compras' = 'retenciones';
+  resumenCompras: PurchaseSustentoGroup[] = [];
+  totalCompraBase0: number = 0;
+  totalCompraBaseGrava: number = 0;
+  totalCompraBaseNoObj: number = 0;
+  totalCompraMontoIva: number = 0;
 
   constructor(private apiService: ApiService) {}
 
   ngOnInit(): void {
     this.cargarCatalogo();
+    this.actualizarFechaImpresion();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['atsData'] && this.catalogo.length > 0) {
-      this.generarReporte();
+    if (changes['atsData']) {
+      if (this.catalogo.length > 0) {
+        this.generarReporte();
+      }
+      this.generarResumenCompras();
     }
   }
 
@@ -54,6 +80,7 @@ export class AtsReporteComponent implements OnInit, OnChanges {
         if (res && res.success) {
           this.catalogo = res.data || [];
           this.generarReporte();
+          this.generarResumenCompras();
         }
       },
       error: (err) => {
@@ -63,7 +90,18 @@ export class AtsReporteComponent implements OnInit, OnChanges {
     });
   }
 
+  actualizarFechaImpresion(): void {
+    const now = new Date();
+    const dia = String(now.getDate()).padStart(2, '0');
+    const mesNum = String(now.getMonth() + 1).padStart(2, '0');
+    const anioNum = now.getFullYear();
+    const horas = String(now.getHours()).padStart(2, '0');
+    const minutos = String(now.getMinutes()).padStart(2, '0');
+    this.fechaImpresion = `${dia}/${mesNum}/${anioNum} ${horas}:${minutos}`;
+  }
+
   imprimir(): void {
+    this.actualizarFechaImpresion();
     window.print();
   }
 
@@ -216,6 +254,108 @@ export class AtsReporteComponent implements OnInit, OnChanges {
           this.totalGeneralBase += item.baseImponible;
           this.totalGeneralRetenido += item.valorRetenido;
         }
+      });
+    });
+  }
+
+  getTipoComprobanteDesc(code: string): string {
+    const map: { [key: string]: string } = {
+      '01': 'Factura',
+      '02': 'Nota o Boleta de Venta',
+      '03': 'Liquidación de Compra',
+      '04': 'Nota de Crédito',
+      '05': 'Nota de Débito',
+      '07': 'Comprobante de Retención',
+      '41': 'Comprobante de Reembolso',
+      '43': 'Liquidación de Compra por Reembolso'
+    };
+    const cleanCode = String(code).trim().padStart(2, '0');
+    return map[cleanCode] || 'Otro Comprobante';
+  }
+
+  getCodSustentoDesc(code: string): string {
+    const map: { [key: string]: string } = {
+      '01': 'Crédito Tributario para IVA (Costo/Gasto IR)',
+      '02': 'Costo/Gasto para IR (Sin Crédito IVA)',
+      '03': 'Activo Fijo (Con Crédito IVA)',
+      '04': 'Costo/Gasto para IR (Sin Crédito IVA - Simplificado)',
+      '05': 'Gastos de viaje, hospedaje y alimentación',
+      '06': 'Inventario de materia prima / mercaderías',
+      '07': 'Costo/Gasto no deducible',
+      '08': 'Reembolso de Siniestros',
+      '09': 'Reembolso por intermedio de operadores de turismo',
+      '10': 'Distribución de dividendos'
+    };
+    const cleanCode = String(code).trim().padStart(2, '0');
+    return map[cleanCode] || 'Otro Sustento';
+  }
+
+  generarResumenCompras(): void {
+    const map = new Map<string, Map<string, PurchaseSummaryDetail>>();
+    
+    this.atsData.forEach(ats => {
+      const codSust = ats.codSustento ? String(ats.codSustento).trim() : 'S/N';
+      let tipoComp = ats.tipoComprobante ? String(ats.tipoComprobante).trim() : 'S/N';
+      if (tipoComp !== 'S/N') {
+        tipoComp = tipoComp.padStart(2, '0');
+      }
+      
+      const base0 = Number(ats.baseImponible) || 0;
+      const baseGrava = Number(ats.baseimpgrav) || 0;
+      const baseNoObj = Number(ats.baseNoGraIva) || 0;
+      const mIva = Number(ats.montoIva) || 0;
+      
+      if (!map.has(codSust)) {
+        map.set(codSust, new Map<string, PurchaseSummaryDetail>());
+      }
+      
+      const subMap = map.get(codSust)!;
+      if (!subMap.has(tipoComp)) {
+        subMap.set(tipoComp, {
+          tipoComprobante: tipoComp,
+          baseImp0: 0,
+          baseImpGrava: 0,
+          baseNoObjIva: 0,
+          montoIva: 0
+        });
+      }
+      
+      const detail = subMap.get(tipoComp)!;
+      detail.baseImp0 += base0;
+      detail.baseImpGrava += baseGrava;
+      detail.baseNoObjIva += baseNoObj;
+      detail.montoIva += mIva;
+    });
+    
+    const groups: PurchaseSustentoGroup[] = [];
+    const sortedCodSustentos = Array.from(map.keys()).sort((a, b) => a.localeCompare(b));
+    
+    sortedCodSustentos.forEach(codSust => {
+      const subMap = map.get(codSust)!;
+      const sortedDetails = Array.from(subMap.values()).sort((a, b) => 
+        a.tipoComprobante.localeCompare(b.tipoComprobante)
+      );
+      
+      groups.push({
+        codSustento: codSust,
+        items: sortedDetails
+      });
+    });
+    
+    this.resumenCompras = groups;
+    
+    // Totales
+    this.totalCompraBase0 = 0;
+    this.totalCompraBaseGrava = 0;
+    this.totalCompraBaseNoObj = 0;
+    this.totalCompraMontoIva = 0;
+    
+    this.resumenCompras.forEach(g => {
+      g.items.forEach(item => {
+        this.totalCompraBase0 += item.baseImp0;
+        this.totalCompraBaseGrava += item.baseImpGrava;
+        this.totalCompraBaseNoObj += item.baseNoObjIva;
+        this.totalCompraMontoIva += item.montoIva;
       });
     });
   }

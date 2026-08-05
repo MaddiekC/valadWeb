@@ -18,6 +18,7 @@ export class UsuarioComponent implements OnInit, AfterViewInit {
   @ViewChild('miModal') miModal!: ElementRef;
   @ViewChild('confirmModal') confirmModal!: ElementRef;
   @ViewChild('permisosModal') permisosModal!: ElementRef;
+  @ViewChild('empresasModal') empresasModal!: ElementRef;
 
   listUsuarios: any[] = [];
   paginaActual: number = 1;
@@ -46,6 +47,14 @@ export class UsuarioComponent implements OnInit, AfterViewInit {
   permisosError: string | null = null;
   private permisosModalInstance: any;
 
+  // Empresas properties
+  userEmpresaIds: any[] = [];
+  empresasDisponibles: any[] = [];
+  loadingEmpresas = false;
+  savingEmpresas = false;
+  empresasError: string | null = null;
+  private empresasModalInstance: any;
+
   showSuccess(message: string) {
     this.saveSuccess = message;
     setTimeout(() => {
@@ -70,6 +79,9 @@ export class UsuarioComponent implements OnInit, AfterViewInit {
     }
     if (this.permisosModal) {
       this.permisosModalInstance = new bootstrap.Modal(this.permisosModal.nativeElement);
+    }
+    if (this.empresasModal) {
+      this.empresasModalInstance = new bootstrap.Modal(this.empresasModal.nativeElement);
     }
   }
 
@@ -215,6 +227,81 @@ export class UsuarioComponent implements OnInit, AfterViewInit {
         console.error('Error saving user permissions', err);
         this.permisosError = 'Error al guardar los permisos.';
         this.savingPermisos = false;
+      }
+    });
+  }
+
+  openEmpresasModal(user: any) {
+    this.selectedUser = user;
+    this.empresasError = null;
+    this.userEmpresaIds = [];
+    this.loadingEmpresas = true;
+
+    if (!this.empresasModalInstance && this.empresasModal) {
+      this.empresasModalInstance = new bootstrap.Modal(this.empresasModal.nativeElement);
+    }
+    this.empresasModalInstance.show();
+
+    const fetchUserEmpresas = () => {
+      this.apiService.getUserEmpresas(user.id).subscribe({
+        next: (userEmps: any[]) => {
+          this.userEmpresaIds = userEmps.map((id: any) => Number(id));
+          this.loadingEmpresas = false;
+        },
+        error: (err) => {
+          console.error('Error fetching user companies', err);
+          this.empresasError = 'Error al cargar las empresas del usuario.';
+          this.loadingEmpresas = false;
+        }
+      });
+    };
+
+    if (this.empresasDisponibles.length === 0) {
+      this.apiService.getEmpresasParaAsignar().subscribe({
+        next: (res: any[]) => {
+          this.empresasDisponibles = res.map((e: any) => ({ ...e, idEmpresa: Number(e.idEmpresa) }));
+          fetchUserEmpresas();
+        },
+        error: (err) => {
+          console.error('Error fetching companies list', err);
+          this.empresasError = 'Error al cargar las empresas disponibles.';
+          this.loadingEmpresas = false;
+        }
+      });
+    } else {
+      fetchUserEmpresas();
+    }
+  }
+
+  isEmpresaSelected(id: any): boolean {
+    return this.userEmpresaIds.includes(Number(id));
+  }
+
+  toggleEmpresa(id: any) {
+    const numId = Number(id);
+    const idx = this.userEmpresaIds.indexOf(numId);
+    if (idx > -1) {
+      this.userEmpresaIds.splice(idx, 1);
+    } else {
+      this.userEmpresaIds.push(numId);
+    }
+  }
+
+  onSaveEmpresas() {
+    if (!this.selectedUser) return;
+    this.savingEmpresas = true;
+    this.empresasError = null;
+
+    this.apiService.updateUserEmpresas(this.selectedUser.id, this.userEmpresaIds).subscribe({
+      next: () => {
+        this.savingEmpresas = false;
+        this.empresasModalInstance.hide();
+        this.showSuccess(`Empresas del usuario ${this.selectedUser.username} actualizadas con éxito.`);
+      },
+      error: (err) => {
+        console.error('Error saving user companies', err);
+        this.empresasError = 'Error al guardar los permisos de empresas.';
+        this.savingEmpresas = false;
       }
     });
   }
