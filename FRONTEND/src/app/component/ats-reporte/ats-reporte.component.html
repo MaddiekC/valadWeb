@@ -160,4 +160,36 @@
       </tr>
     </tbody>
   </table>
+
+  <!-- TABLA 3: Reporte Retención en la Fuente del IVA (Debajo de los totales de compras) -->
+  <div *ngIf="reporteActivo === 'compras' && resumenCompras.length > 0" class="mt-4" style="max-width: 600px;">
+    <h6 class="fw-bold text-dark mb-2">Retención en la Fuente del IVA</h6>
+    <table class="reporte-table table table-bordered">
+      <thead>
+        <tr>
+          <th class="text-start py-2" style="background-color: #0b3c5d; color: #fff; width: 70%;">Concepto de Retención</th>
+          <th class="text-end py-2" style="background-color: #0b3c5d; color: #fff; width: 30%;">Valor Retenido</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngIf="resumenRetencionesIva.length === 0">
+          <td colspan="2" class="text-center text-muted py-3">
+            No hay retenciones de IVA en el período seleccionado.
+          </td>
+        </tr>
+        <tr *ngFor="let item of resumenRetencionesIva">
+          <td class="text-start text-dark py-2 px-3">{{ item.concepto }}</td>
+          <td class="text-end font-monospace text-dark py-2 px-3">
+            {{ item.valorRetenido | currency:'USD':'symbol':'1.2-2' }}
+          </td>
+        </tr>
+        <tr class="total-general-row" *ngIf="resumenRetencionesIva.length > 0">
+          <td class="text-start fw-bold py-2 px-3">TOTAL DE RETENCIONES IVA</td>
+          <td class="text-end font-monospace fw-bold text-success py-2 px-3">
+            {{ totalRetencionesIva | currency:'USD':'symbol':'1.2-2' }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </div>

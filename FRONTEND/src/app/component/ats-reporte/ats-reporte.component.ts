@@ -28,6 +28,11 @@ export interface PurchaseSustentoGroup {
   items: PurchaseSummaryDetail[];
 }
 
+export interface RetencionIvaItem {
+  concepto: string;
+  valorRetenido: number;
+}
+
 @Component({
   selector: 'app-ats-reporte',
   standalone: true,
@@ -55,6 +60,10 @@ export class AtsReporteComponent implements OnInit, OnChanges {
   totalCompraBaseGrava: number = 0;
   totalCompraBaseNoObj: number = 0;
   totalCompraMontoIva: number = 0;
+
+  // VAT withholding summary fields
+  resumenRetencionesIva: RetencionIvaItem[] = [];
+  totalRetencionesIva: number = 0;
 
   constructor(private apiService: ApiService) {}
 
@@ -358,5 +367,33 @@ export class AtsReporteComponent implements OnInit, OnChanges {
         this.totalCompraMontoIva += item.montoIva;
       });
     });
+
+    // Aggregation of VAT withholdings (Retenciones de IVA)
+    let total10 = 0;
+    let total20 = 0;
+    let total30 = 0;
+    let total50 = 0;
+    let total70 = 0;
+    let total100 = 0;
+
+    this.atsData.forEach(ats => {
+      total10 += Number(ats.valorRetBien10) || 0;
+      total20 += Number(ats.valRetServ20) || 0;
+      total30 += Number(ats.valorRetBienes) || 0;
+      total50 += Number(ats.valRetServ50) || 0;
+      total70 += Number(ats.valorRetServicios) || 0;
+      total100 += Number(ats.valRetServ100) || Number(ats.valorRetServ100) || 0;
+    });
+
+    const retencionesItems: RetencionIvaItem[] = [];
+    if (total10 > 0) retencionesItems.push({ concepto: 'Retención de IVA 10%', valorRetenido: total10 });
+    if (total20 > 0) retencionesItems.push({ concepto: 'Retención de IVA 20%', valorRetenido: total20 });
+    if (total30 > 0) retencionesItems.push({ concepto: 'Retención de IVA 30%', valorRetenido: total30 });
+    if (total50 > 0) retencionesItems.push({ concepto: 'Retención de IVA 50%', valorRetenido: total50 });
+    if (total70 > 0) retencionesItems.push({ concepto: 'Retención de IVA 70%', valorRetenido: total70 });
+    if (total100 > 0) retencionesItems.push({ concepto: 'Retención de IVA 100%', valorRetenido: total100 });
+
+    this.resumenRetencionesIva = retencionesItems;
+    this.totalRetencionesIva = total10 + total20 + total30 + total50 + total70 + total100;
   }
 }
